@@ -38,4 +38,4 @@ jobs:
         run: |
           python3 --version
           python3 -m pip install --user pytest
-          bash run_unit_tests.sh --force-pythonpath
+          bash run_tests.sh unit --force-pythonpath
