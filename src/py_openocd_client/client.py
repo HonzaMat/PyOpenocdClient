@@ -34,9 +34,8 @@ class PyOpenocdClient:
         self.connect()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.disconnect()
-        return False  # don't swallow any exception
 
     def set_default_timeout(self, timeout: float) -> None:
         self._client_base.set_default_timeout(timeout)
@@ -249,7 +248,9 @@ class PyOpenocdClient:
 
         match = re.match(version_regex, version_str)
         if match is None:
-            raise ValueError(f"Unable to parse version string received from OpenOCD: {version_str}")
+            raise ValueError(
+                f"Unable to parse version string received from OpenOCD: {version_str}"
+            )
 
         major = int(match.group(1))
         minor = int(match.group(2))

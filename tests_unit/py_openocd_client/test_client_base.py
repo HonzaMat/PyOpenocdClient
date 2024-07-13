@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: MIT
 
-import select
 import socket
 from unittest import mock
 

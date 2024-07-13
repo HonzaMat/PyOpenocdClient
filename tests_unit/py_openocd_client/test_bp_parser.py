@@ -42,7 +42,7 @@ def test_parse_bp_entry_hw():
     assert bp_info.bp_type == BpType.HW
     assert bp_info.addr == 0x1010
     assert bp_info.size == 4
-    assert bp_info.orig_instr == None
+    assert bp_info.orig_instr is None
 
     bp_info2 = _BpParser.parse_bp_entry(bp_entry_legacy)
     assert bp_info == bp_info2

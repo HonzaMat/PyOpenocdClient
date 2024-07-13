@@ -2,7 +2,7 @@
 
 import pytest
 
-from py_openocd_client import PyOpenocdClient, OcdCommandTimeout
+from py_openocd_client import OcdCommandTimeout, PyOpenocdClient
 
 
 def test_no_output(openocd_process):
@@ -30,7 +30,7 @@ def test_whitespace_trimmed(openocd_process):
 def test_nonexistent_cmd(openocd_process):
     with PyOpenocdClient() as ocd:
         out = ocd.raw_cmd("nonexistent_cmd")
-        assert out == "invalid command name \"nonexistent_cmd\""
+        assert out == 'invalid command name "nonexistent_cmd"'
 
 
 def test_capture(openocd_process):
@@ -53,7 +53,9 @@ def test_catch_error(openocd_process):
 
 def test_catch_output_and_success(openocd_process):
     with PyOpenocdClient() as ocd:
-        out = ocd.raw_cmd("set RETCODE [ catch { version } OUT ]; return \"$RETCODE $OUT\" ")
+        out = ocd.raw_cmd(
+            'set RETCODE [ catch { version } OUT ]; return "$RETCODE $OUT" '
+        )
 
         parts = out.split(" ", maxsplit=1)
         retcode = int(parts[0])
@@ -65,7 +67,9 @@ def test_catch_output_and_success(openocd_process):
 
 def test_catch_output_and_error(openocd_process):
     with PyOpenocdClient() as ocd:
-        out = ocd.raw_cmd("set RETCODE [ catch { nonexistent_cmd } OUT; ]; return \"$RETCODE $OUT\" ")
+        out = ocd.raw_cmd(
+            'set RETCODE [ catch { nonexistent_cmd } OUT; ]; return "$RETCODE $OUT" '
+        )
 
         parts = out.split(" ", maxsplit=1)
         retcode = int(parts[0])
@@ -78,6 +82,7 @@ def test_catch_output_and_error(openocd_process):
 def test_raw_cmd_timeout_ok(openocd_process):
     with PyOpenocdClient() as ocd:
         out = ocd.raw_cmd("sleep 1000", timeout=2.0)
+        assert out == ""
 
 
 def test_raw_cmd_timeout_exceeded(openocd_process):

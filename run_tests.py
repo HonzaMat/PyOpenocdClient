@@ -3,10 +3,11 @@
 # SPDX-License-Identifier: MIT
 
 import argparse
-from pathlib import Path
+import importlib.util
 import os
 import subprocess
 import sys
+from pathlib import Path
 from typing import List
 
 
@@ -17,14 +18,25 @@ def get_script_dir() -> Path:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--coverage", action="store_true",
-                        help="Collect coverage from the unit test run")
-    parser.add_argument("--force-pythonpath", action="store_true",
-                        help=("Point PYTHONPATH to the source directory, so that the tests "
-                              "can run even without having the package installed"))
-    parser.add_argument("--openocd-path", help="Path to OpenOCD executable", default=None)
-    parser.add_argument("test_type", choices=["unit", "integration"],
-                        help="Type of the tests")
+    parser.add_argument(
+        "--coverage",
+        action="store_true",
+        help="Collect coverage from the unit test run",
+    )
+    parser.add_argument(
+        "--force-pythonpath",
+        action="store_true",
+        help=(
+            "Point PYTHONPATH to the source directory, so that the tests "
+            "can run even without having the package installed"
+        ),
+    )
+    parser.add_argument(
+        "--openocd-path", help="Path to OpenOCD executable", default=None
+    )
+    parser.add_argument(
+        "test_type", choices=["unit", "integration"], help="Type of the tests"
+    )
     return parser.parse_args()
 
 
@@ -48,7 +60,9 @@ def run_integration_tests(openocd_path: Path, enable_coverage: bool) -> None:
         "pytest",
         "tests_integration/py_openocd_client/",
         "-vv",
-        "--openocd-path", str(openocd_path)]
+        "--openocd-path",
+        str(openocd_path),
+    ]
     if enable_coverage:
         cmd = [sys.executable, "-m", "coverage", "run"] + pytest_args
     else:
@@ -73,14 +87,14 @@ def main() -> int:
         # Allow running the unit tests even without having the package installed
         os.environ["PYTHONPATH"] = str(get_script_dir() / "src")
     else:
-        try:
-            import py_openocd_client
-        except ModuleNotFoundError:
+        if importlib.util.find_spec("py_openocd_client") is None:
             print("Error: Package py_openocd_client not found.")
             print("You can:")
             print("- install the package before running the tests, or")
-            print("- start the script with --force-pythonpath to modify PYTHONPATH "
-                  "and use the source code directly, without having it installed")
+            print(
+                "- start the script with --force-pythonpath to modify PYTHONPATH "
+                "and use the source code directly, without having it installed"
+            )
             return 1
 
     if args.test_type == "unit":
@@ -92,7 +106,7 @@ def main() -> int:
         if not args.openocd_path:
             raise RuntimeError("--openocd-path is required for integration tests")
         openocd_path = Path(args.openocd_path).resolve()
-        run_integration_tests(args.openocd_path, args.coverage)
+        run_integration_tests(openocd_path, args.coverage)
 
     else:
         assert False
@@ -106,6 +120,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
-
-
