@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import List, Literal, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from .bp_parser import _BpParser
 from .client_base import _PyOpenocdClientBase
@@ -34,9 +34,8 @@ class PyOpenocdClient:
         self.connect()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> Literal[False]:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.disconnect()
-        return False  # don't swallow any exception
 
     def set_default_timeout(self, timeout: float) -> None:
         self._client_base.set_default_timeout(timeout)
