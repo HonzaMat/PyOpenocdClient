@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple
 
 from .bp_parser import _BpParser
 from .client_base import _PyOpenocdClientBase
@@ -34,7 +34,7 @@ class PyOpenocdClient:
         self.connect()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> Literal[False]:
         self.disconnect()
         return False  # don't swallow any exception
 
@@ -249,7 +249,9 @@ class PyOpenocdClient:
 
         match = re.match(version_regex, version_str)
         if match is None:
-            raise ValueError(f"Unable to parse version string received from OpenOCD: {version_str}")
+            raise ValueError(
+                f"Unable to parse version string received from OpenOCD: {version_str}"
+            )
 
         major = int(match.group(1))
         minor = int(match.group(2))

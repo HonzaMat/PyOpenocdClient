@@ -12,6 +12,7 @@ from py_openocd_client import (
 
 # TODO: Rename _PyOpenocdClientBase to _PyOpenocdBaseClient
 
+
 # TODO: Rename to client_base_mock
 @pytest.fixture()
 def socket_base_inst_mock():
@@ -222,9 +223,6 @@ def test_cmd_negative_retcode(socket_base_inst_mock):
 
     assert e.value.result.retcode == -123
     assert e.value.result.out == "some output"
-
-
-
 
 
 def test_cmd_invalid_responses(socket_base_inst_mock):

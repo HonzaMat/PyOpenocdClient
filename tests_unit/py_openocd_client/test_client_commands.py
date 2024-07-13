@@ -271,9 +271,9 @@ def test_list_wp_empty(ocd):
 
 def test_list_wp_non_empty(ocd):
     wp_command_output = (
-        "address: 0x10002000, len: 0x00000004, r/w/a: r, value: 0x00000000, mask: 0xffffffffffffffff\n"
-        "address: 0x10002800, len: 0x00000002, r/w/a: w, value: 0x00000000, mask: 0xffffffffffffffff\n"
-        "address: 0x10003000, len: 0x00000008, r/w/a: a, value: 0x00001122, mask: 0xffffffffffff0000\n"
+        "address: 0x10002000, len: 0x00000004, r/w/a: r, value: 0x00000000, mask: 0xffffffffffffffff\n"  # noqa: E501
+        "address: 0x10002800, len: 0x00000002, r/w/a: w, value: 0x00000000, mask: 0xffffffffffffffff\n"  # noqa: E501
+        "address: 0x10003000, len: 0x00000008, r/w/a: a, value: 0x00001122, mask: 0xffffffffffff0000\n"  # noqa: E501
     )
     ocd.cmd.return_value = _mock_command_result(wp_command_output)
     wps = ocd.list_wp()

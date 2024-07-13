@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: MIT
 
-import pytest
 import time
-import re
 
-from py_openocd_client import PyOpenocdClient, OcdCommandError, OcdCommandTimeout
+import pytest
+
+from py_openocd_client import OcdCommandError, OcdCommandTimeout, PyOpenocdClient
 
 
 def test_basic(openocd_process):
@@ -120,7 +120,7 @@ def test_timeout_ok(openocd_process):
 
 def test_timeout_exceeded(openocd_process):
     with PyOpenocdClient() as ocd:
-        with pytest.raises(OcdCommandTimeout) as e:
+        with pytest.raises(OcdCommandTimeout):
             ocd.cmd("sleep 2000", timeout=1.0)
 
         # Timeout causes disconnection
@@ -144,5 +144,6 @@ def test_shutdown(openocd_process):
 
         # Give OpenOCD time to exit - avoid races
         time.sleep(2.0)
-        assert openocd_process.poll() is not None, \
-            "OpenOCD process did not terminate after shutdown command"
+        assert (
+            openocd_process.poll() is not None
+        ), "OpenOCD process did not terminate after shutdown command"
