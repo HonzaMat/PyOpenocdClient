@@ -26,5 +26,5 @@ jobs:
 
       - name: Run integration test
         run: |
-          python3 -m pytest tests_integration/py_openocd_client/ -vv --openocd-path oocd-build/install/${{ matrix.openocd_version }}/bin/openocd
+          python3 run_tests.py integration --force-pythonpath --openocd-path oocd-build/install/${{ matrix.openocd_version }}/bin/openocd
 
