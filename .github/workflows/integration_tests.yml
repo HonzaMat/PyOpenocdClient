@@ -2,7 +2,7 @@ name: Integration tests
 on: [push]
 jobs:
   integration_tests:
-    name: Integration test against OpenOCD
+    name: Integration against OpenOCD
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -19,6 +19,10 @@ jobs:
         run: |
           mkdir -p oocd-build && cd oocd-build
           python3 ../tests_integration/py_openocd_client/build_openocd.py ${{ matrix.openocd_version }}
+
+      - name: Install pytest
+        run: |
+          python3 -m pip install --user pytest
 
       - name: Run integration test
         run: |
