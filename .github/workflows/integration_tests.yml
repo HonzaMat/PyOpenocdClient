@@ -37,9 +37,9 @@ jobs:
       - name: Download and unzip OpenOCD
         run: |
           Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.12.0-3/xpack-openocd-0.12.0-3-win32-x64.zip" -OutFile "openocd.zip"
-          unzip xpack-openocd-0.12.0-3-win32-x64.zip
+          unzip openocd.zip
       - name: Run integration test (Win)
         run: |
-          python3 run_tests.py integration --force-pythonpath --openocd-path xpack-openocd-0.12.0-3/bin/openocd
+          python3 run_tests.py integration --force-pythonpath --openocd-path xpack-openocd-0.12.0-3\\bin\\openocd
 
 
