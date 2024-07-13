@@ -339,6 +339,12 @@ def test_version_tuple(ocd):
     assert ocd.version_tuple() == (11, 12, 13)
 
 
+def test_version_tuple_2(ocd):
+    ocd.version = mock.Mock()
+    ocd.version.return_value = "My Little Open On-Chip Debugger 2.3.4 blah blah"
+    assert ocd.version_tuple() == (2, 3, 4)
+
+
 def test_version_tuple_error(ocd):
     ocd.version = mock.Mock()
     ocd.version.return_value = "Open On-Chip Debugger 9a.10b.11 blah blah"
