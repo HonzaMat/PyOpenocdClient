@@ -95,7 +95,7 @@ def perform_build(version: str) -> None:
         "/bin/sh", "./configure",
         "--prefix=" + str(install_dir)], cwd=src_dir, env=env)
 
-    nproc = max(multiprocessing.cpu_count(), 8)  # safety
+    nproc = min(multiprocessing.cpu_count(), 8)  # safety
     run_cmd(["make", f"-j{nproc}"], cwd=src_dir)
     run_cmd(["make", "install"], cwd=src_dir)
 
