@@ -339,12 +339,24 @@ def test_version_tuple(ocd):
     assert ocd.version_tuple() == (11, 12, 13)
 
 
+def test_version_tuple_2(ocd):
+    ocd.version = mock.Mock()
+    ocd.version.return_value = "My Little Open On-Chip Debugger 2.3.4 blah blah"
+    assert ocd.version_tuple() == (2, 3, 4)
+
+
+def test_version_tuple_3(ocd):
+    ocd.version = mock.Mock()
+    ocd.version.return_value = "xPack Open On-Chip Debugger 0.12.0+dev-01557-gdd1758272-dirty (2024-04-02-07:27)"  # noqa: E501
+    assert ocd.version_tuple() == (0, 12, 0)
+
+
 def test_version_tuple_error(ocd):
     ocd.version = mock.Mock()
     ocd.version.return_value = "Open On-Chip Debugger 9a.10b.11 blah blah"
     with pytest.raises(ValueError) as e:
         ocd.version_tuple()
-    assert "Unable to parse version string received from OpenOCD" in str(e)
+    assert "Unable to parse the version string received from OpenOCD" in str(e)
 
 
 def test_target_names(ocd):

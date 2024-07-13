@@ -244,12 +244,13 @@ class PyOpenocdClient:
 
     def version_tuple(self) -> Tuple[int, int, int]:
         version_str = self.version()
-        version_regex = r"^Open On\-Chip Debugger (\d+)\.(\d+)\.(\d+)"
+        version_regex = r"Open On\-Chip Debugger (\d+)\.(\d+)\.(\d+)"
 
-        match = re.match(version_regex, version_str)
+        match = re.search(version_regex, version_str)
         if match is None:
             raise ValueError(
-                f"Unable to parse version string received from OpenOCD: {version_str}"
+                "Unable to parse the version string received "
+                "from OpenOCD: {version_str}"
             )
 
         major = int(match.group(1))
