@@ -34,11 +34,20 @@ jobs:
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v4
-      - name: Download and unzip OpenOCD
+
+      - name: Download OpenOCD
         run: |
           Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.12.0-3/xpack-openocd-0.12.0-3-win32-x64.zip" -OutFile "openocd.zip"
+
+      - name: Unzip OpenOCD
+        run: |
           unzip openocd.zip
-      - name: Run integration test (Win)
+
+      - name: Install pytest
+        run: |
+          python3 -m pip install pytest
+
+      - name: Run integration testing
         run: |
           python3 run_tests.py integration --force-pythonpath --openocd-path xpack-openocd-0.12.0-3\\bin\\openocd
 
