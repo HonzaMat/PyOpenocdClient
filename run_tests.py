@@ -22,6 +22,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--force-pythonpath", action="store_true",
                         help=("Point PYTHONPATH to the source directory, so that the tests "
                               "can run even without having the package installed"))
+    parser.add_argument("--openocd-path", help="Path to OpenOCD executable", default=None)
+    parser.add_argument("test_type", choices=["unit", "integration"],
+                        help="Type of the tests")
     return parser.parse_args()
 
 
@@ -30,8 +33,22 @@ def run_subproc(cmd: List[str]) -> None:
     subprocess.check_call(cmd, cwd=get_script_dir())
 
 
-def run_pytest(enable_coverage: bool) -> None:
+def run_unittests(enable_coverage: bool) -> None:
     pytest_args = ["-m", "pytest", "tests_unit/", "-vv"]
+    if enable_coverage:
+        cmd = [sys.executable, "-m", "coverage", "run"] + pytest_args
+    else:
+        cmd = [sys.executable] + pytest_args
+    run_subproc(cmd)
+
+
+def run_integration_tests(openocd_path: Path, enable_coverage: bool) -> None:
+    pytest_args = [
+        "-m",
+        "pytest",
+        "tests_integration/py_openocd_client/",
+        "-vv",
+        "--openocd-path", str(openocd_path)]
     if enable_coverage:
         cmd = [sys.executable, "-m", "coverage", "run"] + pytest_args
     else:
@@ -66,7 +83,20 @@ def main() -> int:
                   "and use the source code directly, without having it installed")
             return 1
 
-    run_pytest(args.coverage)
+    if args.test_type == "unit":
+        if args.openocd_path:
+            raise RuntimeError("--openocd-path is irrelevant for unittests")
+        run_unittests(args.coverage)
+
+    elif args.test_type == "integration":
+        if not args.openocd_path:
+            raise RuntimeError("--openocd-path is required for integration tests")
+        openocd_path = Path(args.openocd_path).resolve()
+        run_integration_tests(args.openocd_path, args.coverage)
+
+    else:
+        assert False
+
     if args.coverage:
         run_coverage_html_generation()
         run_coverage_xml_generation()
