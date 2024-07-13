@@ -1,0 +1,18 @@
+[project]
+name = "PyOpenocdClient"
+version = "0.1.0-dev"
+authors = [
+  { name="Jan Matyas", email="info@janmatyas.net" },
+]
+description = "Library for controlling OpenOCD from Python programs"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/HonzaMat/PyGdbRemoteClient"
+Issues = "https://github.com/HonzaMat/PyGdbRemoteClient/issues"

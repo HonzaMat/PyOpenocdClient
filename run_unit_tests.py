@@ -17,19 +17,17 @@ def get_script_dir() -> Path:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--coverage", action="store_true", help="Collect coverage from the unit test run")
+    parser.add_argument("--coverage", action="store_true",
+                        help="Collect coverage from the unit test run")
+    parser.add_argument("--force-pythonpath", action="store_true",
+                        help=("Point PYTHONPATH to the source directory, so that the tests "
+                              "can run even without having the package installed"))
     return parser.parse_args()
-
-
-def get_subproc_env() -> os._Environ:
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(get_script_dir() / "src")
-    return env
 
 
 def run_subproc(cmd: List[str]) -> None:
     print("Running command: " + repr(cmd))
-    subprocess.check_call(cmd, env=get_subproc_env(), cwd=get_script_dir())
+    subprocess.check_call(cmd, cwd=get_script_dir())
 
 
 def run_pytest(enable_coverage: bool) -> None:
@@ -53,6 +51,21 @@ def run_coverage_xml_generation() -> None:
 
 def main() -> int:
     args = parse_args()
+
+    if args.force_pythonpath:
+        # Allow running the unit tests even without having the package installed
+        os.environ["PYTHONPATH"] = str(get_script_dir() / "src")
+    else:
+        try:
+            import py_openocd_client
+        except ModuleNotFoundError:
+            print("Error: Package py_openocd_client not found.")
+            print("You can:")
+            print("- install the package before running the tests, or")
+            print("- start the script with --force-pythonpath to modify PYTHONPATH "
+                  "and use the source code directly, without having it installed")
+            return 1
+
     run_pytest(args.coverage)
     if args.coverage:
         run_coverage_html_generation()

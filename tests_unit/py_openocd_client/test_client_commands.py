@@ -333,6 +333,20 @@ def test_version(ocd):
     ocd.cmd.assert_called_once_with("version")
 
 
+def test_version_tuple(ocd):
+    ocd.version = mock.Mock()
+    ocd.version.return_value = "Open On-Chip Debugger 11.12.13 blah blah"
+    assert ocd.version_tuple() == (11, 12, 13)
+
+
+def test_version_tuple_error(ocd):
+    ocd.version = mock.Mock()
+    ocd.version.return_value = "Open On-Chip Debugger 9a.10b.11 blah blah"
+    with pytest.raises(ValueError) as e:
+        ocd.version_tuple()
+    assert "Unable to parse version string received from OpenOCD" in str(e)
+
+
 def test_target_names(ocd):
     dummy_target_names = "target_1\n" "target_2\n" "target_3\n"
     ocd.cmd.return_value = _mock_command_result(dummy_target_names)
