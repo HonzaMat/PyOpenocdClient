@@ -28,3 +28,14 @@ jobs:
       - name: Run unit testing (on multiple python versions, using tox)
         run: |
           python3 -m tox
+
+  Run_unit_tests_windows_2022:
+    runs-on: windows-2022
+    steps:
+      - name: Check out the repository code
+        uses: actions/checkout@v4
+      - name: Run unit testing (single python version)
+        run: |
+          python3 --version
+          python3 -m pip install --user pytest
+          bash run_unit_tests.sh --force-pythonpath
