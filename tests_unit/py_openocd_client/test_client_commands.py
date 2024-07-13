@@ -347,7 +347,7 @@ def test_version_tuple_2(ocd):
 
 def test_version_tuple_3(ocd):
     ocd.version = mock.Mock()
-    ocd.version.return_value = "xPack Open On-Chip Debugger 0.12.0+dev-01557-gdd1758272-dirty (2024-04-02-07:27)"
+    ocd.version.return_value = "xPack Open On-Chip Debugger 0.12.0+dev-01557-gdd1758272-dirty (2024-04-02-07:27)"  # noqa: E501
     assert ocd.version_tuple() == (0, 12, 0)
 
 

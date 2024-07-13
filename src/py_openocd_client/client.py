@@ -249,7 +249,8 @@ class PyOpenocdClient:
         match = re.search(version_regex, version_str)
         if match is None:
             raise ValueError(
-                f"Unable to parse the version string received from OpenOCD: {version_str}"
+                "Unable to parse the version string received "
+                "from OpenOCD: {version_str}"
             )
 
         major = int(match.group(1))
