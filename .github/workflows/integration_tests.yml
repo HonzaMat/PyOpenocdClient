@@ -29,13 +29,14 @@ jobs:
           python3 run_tests.py integration --force-pythonpath --openocd-path oocd-build/install/${{ matrix.openocd_version }}/bin/openocd
 
   integration_test_windows:
+    name: OpenOCD on Windows
     runs-on: windows-2022
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v4
       - name: Download and unzip OpenOCD
         run: |
-          wget "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.12.0-3/xpack-openocd-0.12.0-3-win32-x64.zip"
+          Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.12.0-3/xpack-openocd-0.12.0-3-win32-x64.zip" -OutFile "openocd.zip"
           unzip xpack-openocd-0.12.0-3-win32-x64.zip
       - name: Run integration test (Win)
         run: |
