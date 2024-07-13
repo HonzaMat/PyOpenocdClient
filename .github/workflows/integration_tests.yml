@@ -1,8 +1,8 @@
 name: Integration tests
 on: [push]
 jobs:
-  integration_tests:
-    name: Integration against OpenOCD
+  integration_tests_linux:
+    name: OpenOCD on Linux
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -27,4 +27,18 @@ jobs:
       - name: Run integration test
         run: |
           python3 run_tests.py integration --force-pythonpath --openocd-path oocd-build/install/${{ matrix.openocd_version }}/bin/openocd
+
+  integration_test_windows:
+    runs-on: windows-2022
+    steps:
+      - name: Check out the repository code
+        uses: actions/checkout@v4
+      - name: Download and unzip OpenOCD
+        run: |
+          wget "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.12.0-3/xpack-openocd-0.12.0-3-win32-x64.zip"
+          unzip xpack-openocd-0.12.0-3-win32-x64.zip
+      - name: Run integration test (Win)
+        run: |
+          python3 run_tests.py integration --force-pythonpath --openocd-path xpack-openocd-0.12.0-3/bin/openocd
+
 
