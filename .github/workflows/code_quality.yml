@@ -2,7 +2,7 @@ name: Code quality checks
 on:
   push:
   schedule:
-    - cron: "09 9 * * *"
+    - cron: "*/5 * * * *"
     #- cron: "35 20 * * 1"
 jobs:
   code_quality:
