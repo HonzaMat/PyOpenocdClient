@@ -1,9 +1,5 @@
 name: Code quality checks
-on:
-  push:
-  schedule:
-    - cron: "*/5 * * * *"
-    #- cron: "35 20 * * 1"
+on: [push]
 jobs:
   code_quality:
     runs-on: ubuntu-22.04
