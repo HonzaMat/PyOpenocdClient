@@ -12,15 +12,13 @@ class _PyOpenocdBaseClient:
     """
     Internal class that implements the TCL command exchange with OpenOCD.
 
-    The base layer of the communication is implemented in this class:
-    - Sending of commands
-    - Receiving of responses
-    - Handling of network sockets
-    - Detection of communication errors
-    - Detection of command timeouts
+    .. warning::
+        This class is internal and is not intended for direct use.
+        The API is not guaranteed to remain stable between releases.
 
-    This class is not intended for direct use. The derived class
-    "PyOpenocdClient", built on top of this, should be used instead.
+        The stable API of :py:class:`py_openocd_client.PyOpenocdClient`
+        shall be used instead.
+
     """
 
     # Character that delimits commands and responses

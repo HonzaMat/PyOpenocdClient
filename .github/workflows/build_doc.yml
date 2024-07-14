@@ -1,0 +1,19 @@
+name: Build documentation
+on: [push]
+jobs:
+  build_doc:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out the repository code
+        uses: actions/checkout@v4
+
+      - name: Install tools for documentation
+        run: |
+          python3 -m pip install --user -r requirements_doc.txt
+
+      - name: Build the documentation
+        run: |
+          python3 build_doc.py
+
+
+
