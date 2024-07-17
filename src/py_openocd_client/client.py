@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Type
 
 from .bp_parser import _BpParser
 from .client_base import _PyOpenocdClientBase
@@ -34,7 +34,17 @@ class PyOpenocdClient:
         self.connect()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[Type[Any]],
+    ) -> None:
+        # FIXME:
+        # Parameter "exc_tb" should probably be annotated as Optional[TracebackType],
+        # but then mypy complains this way:
+        # Module "typing" does not explicitly export attribute "TracebackType".
+
         self.disconnect()
 
     def set_default_timeout(self, timeout: float) -> None:
@@ -128,7 +138,7 @@ class PyOpenocdClient:
         self.cmd(cmd)
 
     @staticmethod
-    def _check_memory_access_params(addr: int, bit_width: int):
+    def _check_memory_access_params(addr: int, bit_width: int) -> None:
         if addr < 0:
             raise ValueError("Address must be non-negative")
         memory_access_widths = [8, 16, 32, 64]
@@ -176,7 +186,7 @@ class PyOpenocdClient:
         return values
 
     @staticmethod
-    def _check_memory_write_values(values, bit_width):
+    def _check_memory_write_values(values: list[int], bit_width: int) -> None:
         if len(values) < 1:
             raise ValueError("At least one value to write must be provided")
         if any(v < 0 for v in values):
@@ -185,7 +195,7 @@ class PyOpenocdClient:
             raise ValueError(f"Found a value that exceeds {bit_width} bits")
 
     @staticmethod
-    def _make_tcl_list(values: List[int]):
+    def _make_tcl_list(values: List[int]) -> str:
         return "{" + " ".join(map(hex, values)) + "}"
 
     def write_memory(
