@@ -25,7 +25,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def run_tool(cmd: list[str]):
+def run_tool(cmd: list[str]) -> None:
     print()
     print("Running tool: " + repr(cmd))
     subprocess.check_call(cmd)
@@ -64,7 +64,7 @@ def run_tool_flake8(targets: list[Path]) -> None:
 
 def run_tool_mypy(targets: list[Path]) -> None:
     for t in targets:
-        cmd = [sys.executable, "-m", "mypy", str(t)]
+        cmd = [sys.executable, "-m", "mypy", "--strict", str(t)]
         run_tool(cmd)
 
 

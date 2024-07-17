@@ -84,7 +84,7 @@ class _PyOpenocdClientBase:
 
         self._close_socket(disconnect_nicely=True)
 
-    def reconnect(self):
+    def reconnect(self) -> None:
         self.disconnect()
         self.connect()
 
@@ -116,7 +116,7 @@ class _PyOpenocdClientBase:
         self._socket.settimeout(self.SEND_TIMEOUT)
         self._socket.send(data)
 
-    def _do_recv_response(self, timeout=None) -> str:
+    def _do_recv_response(self, timeout: Optional[float] = None) -> str:
         assert self.is_connected()
         assert self._socket is not None
 
