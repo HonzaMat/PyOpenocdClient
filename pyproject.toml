@@ -1,6 +1,6 @@
 [project]
 name = "PyOpenocdClient"
-version = "0.0.2-experim"
+version = "0.0.3-experim"
 authors = [
   { name="Jan Matyas", email="info@janmatyas.net" },
 ]
