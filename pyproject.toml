@@ -1,6 +1,6 @@
 [project]
 name = "PyOpenocdClient"
-version = "0.1.0-dev"
+version = "0.0.5-dev"
 authors = [
   { name="Jan Matyas", email="info@janmatyas.net" },
 ]
@@ -14,5 +14,5 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/HonzaMat/PyGdbRemoteClient"
-Issues = "https://github.com/HonzaMat/PyGdbRemoteClient/issues"
+Homepage = "https://github.com/HonzaMat/PyOpenocdClient"
+Issues = "https://github.com/HonzaMat/PyOpenocdClient/issues"
