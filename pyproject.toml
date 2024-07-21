@@ -14,5 +14,5 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/HonzaMat/PyGdbRemoteClient"
-Issues = "https://github.com/HonzaMat/PyGdbRemoteClient/issues"
+Homepage = "https://github.com/HonzaMat/PyOpenocdClient"
+Issues = "https://github.com/HonzaMat/PyOpenocdClient/issues"
