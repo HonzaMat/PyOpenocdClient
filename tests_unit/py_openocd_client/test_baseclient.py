@@ -5,7 +5,7 @@ from unittest import mock
 
 import pytest
 
-from py_openocd_client.client_base import _PyOpenocdClientBase
+from py_openocd_client.baseclient import _PyOpenocdBaseClient
 
 _COMMAND_DELIMITER = b"\x1a"
 
@@ -37,7 +37,7 @@ def select_mock():
 
 
 def test_connect_disconnect(socket_inst_mock):
-    ocd_base = _PyOpenocdClientBase("192.168.1.1", 6666)
+    ocd_base = _PyOpenocdBaseClient("192.168.1.1", 6666)
 
     assert not ocd_base.is_connected()
     assert ocd_base._socket is None
@@ -82,7 +82,7 @@ def test_connect_disconnect(socket_inst_mock):
 
 
 def test_raw_cmd(select_mock):
-    ocd_base = _PyOpenocdClientBase("192.168.2.1", 6666)
+    ocd_base = _PyOpenocdBaseClient("192.168.2.1", 6666)
     ocd_base.connect()
     assert ocd_base.is_connected()
 
@@ -103,7 +103,7 @@ def test_raw_cmd(select_mock):
 
 
 def test_raw_cmd_multiple_pieces(select_mock, socket_inst_mock):
-    ocd_base = _PyOpenocdClientBase("192.168.2.1", 7777)
+    ocd_base = _PyOpenocdBaseClient("192.168.2.1", 7777)
     ocd_base.connect()
     assert ocd_base.is_connected()
 

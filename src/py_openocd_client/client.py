@@ -5,8 +5,8 @@ from __future__ import annotations
 import re
 from typing import Any, List, Optional, Tuple, Type
 
+from .baseclient import _PyOpenocdBaseClient
 from .bp_parser import _BpParser
-from .client_base import _PyOpenocdClientBase
 from .errors import OcdCommandError, OcdCommandInvalidResponse
 from .types import BpInfo, OcdCommandResult, WpInfo, WpType
 from .wp_parser import _WpParser
@@ -16,7 +16,7 @@ class PyOpenocdClient:
     def __init__(self, host: str = "127.0.0.1", port: int = 6666) -> None:
         self._host = host
         self._port = port
-        self._client_base = _PyOpenocdClientBase(host, port)
+        self._client_base = _PyOpenocdBaseClient(host, port)
 
     def connect(self) -> None:
         self._client_base.connect()

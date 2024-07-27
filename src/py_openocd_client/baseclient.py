@@ -8,9 +8,9 @@ from typing import Optional
 from .errors import OcdCommandTimeout, OcdConnectionError
 
 
-class _PyOpenocdClientBase:
+class _PyOpenocdBaseClient:
     """
-    Base class that implements the TCL command exchange with OpenOCD.
+    Internal class that implements the TCL command exchange with OpenOCD.
 
     The base layer of the communication is implemented in this class:
     - Sending of commands
