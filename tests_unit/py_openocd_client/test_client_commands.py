@@ -16,12 +16,15 @@ from py_openocd_client import (
 
 @pytest.fixture()
 def ocd() -> PyOpenocdClient:
+    """
+    Get an instance of PyOpenocdClient whose cmd() method is a mock
+    """
     ocd = PyOpenocdClient()
-    ocd.cmd = mock.Mock()  # patch the cmd() method
+    ocd.cmd = mock.Mock()
     return ocd
 
 
-def _mock_command_result(out) -> OcdCommandResult:
+def _prepare_command_result(out) -> OcdCommandResult:
     return OcdCommandResult(
         retcode="0", cmd="don't care", full_cmd="don't care", out=out
     )
@@ -66,7 +69,7 @@ def test_reset_run(ocd):
 
 
 def test_curstate(ocd):
-    ocd.cmd.return_value = _mock_command_result("halted")
+    ocd.cmd.return_value = _prepare_command_result("halted")
     assert ocd.curstate() == "halted"
     ocd.cmd.assert_called_once_with("[target current] curstate")
 
@@ -88,12 +91,12 @@ def test_is_halted_is_running(ocd):
 
 
 def test_get_reg(ocd):
-    ocd.cmd.return_value = _mock_command_result("0x1234")
+    ocd.cmd.return_value = _prepare_command_result("0x1234")
     assert ocd.get_reg("pc") == 0x1234
     ocd.cmd.assert_called_once_with("dict get [ get_reg pc ] pc")
     ocd.cmd.reset_mock()
 
-    ocd.cmd.return_value = _mock_command_result("0xaaaa")
+    ocd.cmd.return_value = _prepare_command_result("0xaaaa")
     assert ocd.get_reg("sp", force=True) == 0xAAAA
     ocd.cmd.assert_called_once_with("dict get [ get_reg -force sp ] sp")
 
@@ -108,7 +111,7 @@ def test_set_reg(ocd):
 
 
 def test_read_memory_8(ocd):
-    ocd.cmd.return_value = _mock_command_result("0xab")
+    ocd.cmd.return_value = _prepare_command_result("0xab")
     res = ocd.read_memory(0x2000, 8)
     assert res == [0xAB]
     ocd.cmd.assert_called_once_with("read_memory 0x2000 8 1", timeout=None)
@@ -116,7 +119,7 @@ def test_read_memory_8(ocd):
 
 
 def test_read_memory_16_and_count(ocd):
-    ocd.cmd.return_value = _mock_command_result(
+    ocd.cmd.return_value = _prepare_command_result(
         "0x1111 0x2222 0x3333 0x4444 0x5555 0x6666 0x7777 0x8888"
     )
     res = ocd.read_memory(0x3000, 16, count=8)
@@ -126,7 +129,7 @@ def test_read_memory_16_and_count(ocd):
 
 
 def test_read_memory_32_and_phys(ocd):
-    ocd.cmd.return_value = _mock_command_result("0x12345678")
+    ocd.cmd.return_value = _prepare_command_result("0x12345678")
     res = ocd.read_memory(0x4000, 32, phys=True)
     assert res == [0x12345678]
     ocd.cmd.assert_called_once_with("read_memory 0x4000 32 1 phys", timeout=None)
@@ -134,7 +137,7 @@ def test_read_memory_32_and_phys(ocd):
 
 
 def test_read_memory_64_and_timeout(ocd):
-    ocd.cmd.return_value = _mock_command_result(
+    ocd.cmd.return_value = _prepare_command_result(
         "0x1122334455667788 " "0xaaaaaaaaaaaaaaaa " "0xbbbbbbbbbbbbbbbb"
     )
     res = ocd.read_memory(0x5000, 64, count=3, timeout=11.5)
@@ -211,20 +214,20 @@ def test_write_memory_argument_errors(ocd):
 
 def test_read_memory_response_errors(ocd):
     # Pretend that only 3 values were returned instead of requested 8
-    ocd.cmd.return_value = _mock_command_result("0x1111 0x2222 0x3333")
+    ocd.cmd.return_value = _prepare_command_result("0x1111 0x2222 0x3333")
     with pytest.raises(ValueError) as e:
         ocd.read_memory(0x1234, 16, count=8)
     assert "different number of values than requested" in str(e)
 
     # Pretend that we received an invalid number
-    ocd.cmd.return_value = _mock_command_result("0x1111 0xKLM")
+    ocd.cmd.return_value = _prepare_command_result("0x1111 0xKLM")
     with pytest.raises(ValueError) as e:
         ocd.read_memory(0x5678, 16, count=2)
     assert "not a valid hexadecimal number" in str(e)
 
 
 def test_list_bp_empty(ocd):
-    ocd.cmd.return_value = _mock_command_result("")
+    ocd.cmd.return_value = _prepare_command_result("")
     assert ocd.list_bp() == []
     ocd.cmd.assert_called_once_with("bp")
 
@@ -234,7 +237,7 @@ def test_list_bp_not_empty(ocd):
         "Hardware breakpoint(IVA): addr=0x10110000, len=0x4, num=0\n"
         "Software breakpoint(IVA): addr=0x10110ff0, len=0x2, orig_instr=0xabcd"
     )
-    ocd.cmd.return_value = _mock_command_result(bp_command_output)
+    ocd.cmd.return_value = _prepare_command_result(bp_command_output)
     bps = ocd.list_bp()
     assert len(bps) == 2
     assert bps[0] == BpInfo(addr=0x10110000, size=4, bp_type=BpType.HW, orig_instr=None)
@@ -264,7 +267,7 @@ def test_remove_all_bp(ocd):
 
 
 def test_list_wp_empty(ocd):
-    ocd.cmd.return_value = _mock_command_result("")
+    ocd.cmd.return_value = _prepare_command_result("")
     assert ocd.list_wp() == []
     ocd.cmd.assert_called_once_with("wp")
 
@@ -275,7 +278,7 @@ def test_list_wp_non_empty(ocd):
         "address: 0x10002800, len: 0x00000002, r/w/a: w, value: 0x00000000, mask: 0xffffffffffffffff\n"  # noqa: E501
         "address: 0x10003000, len: 0x00000008, r/w/a: a, value: 0x00001122, mask: 0xffffffffffff0000\n"  # noqa: E501
     )
-    ocd.cmd.return_value = _mock_command_result(wp_command_output)
+    ocd.cmd.return_value = _prepare_command_result(wp_command_output)
     wps = ocd.list_wp()
     ocd.cmd.assert_called_once_with("wp")
 
@@ -328,7 +331,7 @@ def test_echo(ocd):
 
 
 def test_version(ocd):
-    ocd.cmd.return_value = _mock_command_result("openocd version string")
+    ocd.cmd.return_value = _prepare_command_result("openocd version string")
     assert ocd.version() == "openocd version string"
     ocd.cmd.assert_called_once_with("version")
 
@@ -361,7 +364,7 @@ def test_version_tuple_error(ocd):
 
 def test_target_names(ocd):
     dummy_target_names = "target_1\n" "target_2\n" "target_3\n"
-    ocd.cmd.return_value = _mock_command_result(dummy_target_names)
+    ocd.cmd.return_value = _prepare_command_result(dummy_target_names)
     assert ocd.target_names() == ["target_1", "target_2", "target_3"]
 
 

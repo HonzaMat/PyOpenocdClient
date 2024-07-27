@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 
 from py_openocd_client import OcdCommandTimeout, OcdConnectionError
-from py_openocd_client.client_base import _PyOpenocdClientBase
+from py_openocd_client.baseclient import _PyOpenocdBaseClient
 
 _COMMAND_DELIMITER = b"\x1a"
 
@@ -16,7 +16,7 @@ _COMMAND_DELIMITER = b"\x1a"
 def socket_inst_mock():
     # Prepare a mock that will be returned by socket.socket().
     #
-    # This is to allow introspection even after the _PyOpenocdClientBase
+    # This is to allow introspection even after the _PyOpenocdBaseClient
     # class disconnects and discards its reference to the socket object.
     return mock.Mock()
 
@@ -39,13 +39,13 @@ def select_mock():
 
 def test_constructor_wrong_port():
     with pytest.raises(ValueError) as e:
-        _PyOpenocdClientBase("localhost", 123456)
+        _PyOpenocdBaseClient("localhost", 123456)
 
     assert "Incorrect TCP port" in str(e)
 
 
 def test_double_connect():
-    ocd_base = _PyOpenocdClientBase("localhost", 6666)
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
     ocd_base.connect()
     assert ocd_base.is_connected()
 
@@ -60,7 +60,7 @@ def test_double_connect():
 def test_connect_error(socket_inst_mock):
     socket_inst_mock.connect.side_effect = [ConnectionRefusedError("refused")]
 
-    ocd_base = _PyOpenocdClientBase("localhost", 6666)
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
 
     with pytest.raises(OcdConnectionError) as e:
         ocd_base.connect()
@@ -75,7 +75,7 @@ def test_connect_error(socket_inst_mock):
 def test_set_tcp_nodelay_error(socket_inst_mock):
     socket_inst_mock.setsockopt.side_effect = [OSError("some error")]
 
-    ocd_base = _PyOpenocdClientBase("localhost", 6666)
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
 
     with pytest.raises(OcdConnectionError) as e:
         ocd_base.connect()
@@ -88,7 +88,7 @@ def test_set_tcp_nodelay_error(socket_inst_mock):
 
 
 def test_recv_extra_bytes_before_sending_command(socket_inst_mock, select_mock):
-    ocd_base = _PyOpenocdClientBase("localhost", 6666)
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
     ocd_base.connect()
 
     # Pretend that some data arrived before the command
@@ -108,7 +108,7 @@ def test_recv_extra_bytes_before_sending_command(socket_inst_mock, select_mock):
 
 
 def test_set_default_timeout_wrong_value():
-    ocd_base = _PyOpenocdClientBase("localhost", 6666)
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
 
     with pytest.raises(ValueError):
         ocd_base.set_default_timeout(-8.5)
@@ -118,7 +118,7 @@ def test_set_default_timeout_wrong_value():
 
 
 def test_raw_cmd_timeout_wrong_value():
-    ocd_base = _PyOpenocdClientBase("localhost", 6666)
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
     ocd_base.connect()
 
     with pytest.raises(ValueError):
@@ -129,7 +129,7 @@ def test_raw_cmd_timeout_wrong_value():
 
 
 def test_raw_cmd_not_connected():
-    ocd_base = _PyOpenocdClientBase("localhost", 6666)
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
 
     with pytest.raises(OcdConnectionError) as e:
         ocd_base.raw_cmd("dummy_command with args")
@@ -138,7 +138,7 @@ def test_raw_cmd_not_connected():
 
 
 def test_raw_cmd_connection_closed_by_openocd(socket_inst_mock):
-    ocd_base = _PyOpenocdClientBase("localhost", 6666)
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
     ocd_base.connect()
 
     socket_inst_mock.recv.return_value = b""
@@ -154,7 +154,7 @@ def test_raw_cmd_connection_closed_by_openocd(socket_inst_mock):
 
 
 def test_raw_cmd_extra_bytes_after_delimiter(socket_inst_mock):
-    ocd_base = _PyOpenocdClientBase("localhost", 6666)
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
     ocd_base.connect()
 
     socket_inst_mock.recv.return_value = (
@@ -185,7 +185,7 @@ def _chunks(lst, n):
 
 
 def test_raw_cmd_too_big_response(socket_inst_mock):
-    ocd_base = _PyOpenocdClientBase("localhost", 6666)
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
     ocd_base.connect()
 
     # We are dealing with a large response, so avoid sporadicaly hitting
@@ -212,7 +212,7 @@ def test_raw_cmd_too_big_response(socket_inst_mock):
 
 @pytest.mark.parametrize("use_global_timeout", [True, False])
 def test_raw_cmd_timeout(socket_inst_mock, use_global_timeout):
-    ocd_base = _PyOpenocdClientBase("localhost", 6666)
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
     ocd_base.connect()
 
     if use_global_timeout:
@@ -242,7 +242,7 @@ def test_raw_cmd_timeout(socket_inst_mock, use_global_timeout):
 
 
 def test_socket_close_errors_suppressed(socket_inst_mock):
-    ocd_base = _PyOpenocdClientBase("localhost", 6666)
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
     ocd_base.connect()
 
     # Set up shutdown() and close() to raise an error
