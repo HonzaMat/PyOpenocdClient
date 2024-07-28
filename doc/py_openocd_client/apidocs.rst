@@ -15,6 +15,22 @@ Command result
 .. autoclass:: py_openocd_client.OcdCommandResult
    :members:
 
+Exceptions
+----------
+
+.. autoexception:: OcdCommandFailedError
+   :members:
+
+.. autoexception:: OcdConnectionError
+
+.. autoexception:: OcdCommandTimeout
+   :members:
+
+.. autoexception:: OcdCommandInvalidResponse
+   :members:
+
+.. autoexception:: OcdBaseException
+
 Other data types
 ----------------
 
@@ -30,17 +46,5 @@ Other data types
 .. autoenum:: py_openocd_client.WpType
    :members:
 
-Exceptions
-----------
 
-.. autoexception:: OcdCommandError
-   :members:
-
-.. autoexception:: OcdConnectionError
-
-.. autoexception:: OcdCommandTimeout
-
-.. autoexception:: OcdCommandInvalidResponse
-
-.. autoexception:: OcdError
 

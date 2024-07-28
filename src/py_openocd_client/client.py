@@ -141,10 +141,10 @@ class PyOpenocdClient:
         ``capture`` determines whether to also get log entries produced by the command
         and return it as part of the command output (default: False).
 
-        If the command fails, :py:class:`OcdCommandError` is raised by default, unless
-        this behavior is suppressed by ``throw=False``.
+        If the command fails, :py:class:`OcdCommandFailedError` is raised by default,
+        unless this behavior is suppressed by ``throw=False``.
 
-        ``timeout`` can be used to set the timeout for this command. If not specified,
+        ``timeout`` can be used to override the default timeout. If not specified,
         the default timeout will apply (see :py:meth:`set_default_timeout`).
 
         If the command timeout is exceeded while waiting for OpenOCD to provide
