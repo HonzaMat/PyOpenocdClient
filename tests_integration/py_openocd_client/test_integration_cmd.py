@@ -128,7 +128,7 @@ def test_timeout_exceeded(openocd_process):
             ocd.cmd("sleep 2000", timeout=1.0)
 
         expected_full_cmd = (
-            'set CMD_RETCODE [ catch { sleep 2000 } CMD_OUTPUT ] ; '
+            "set CMD_RETCODE [ catch { sleep 2000 } CMD_OUTPUT ] ; "
             'return "$CMD_RETCODE $CMD_OUTPUT" ;'
         )
         assert e.value.full_cmd == expected_full_cmd
