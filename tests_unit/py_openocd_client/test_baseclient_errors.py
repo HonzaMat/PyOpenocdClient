@@ -6,7 +6,7 @@ from unittest import mock
 
 import pytest
 
-from py_openocd_client import OcdCommandTimeout, OcdConnectionError
+from py_openocd_client import OcdCommandTimeoutError, OcdConnectionError
 from py_openocd_client.baseclient import _PyOpenocdBaseClient
 
 _COMMAND_DELIMITER = b"\x1a"
@@ -227,7 +227,7 @@ def test_raw_cmd_timeout(socket_inst_mock, use_global_timeout):
 
         socket_inst_mock.recv.side_effect = chunks_to_receive
 
-        with pytest.raises(OcdCommandTimeout) as e:
+        with pytest.raises(OcdCommandTimeoutError) as e:
             if not use_global_timeout:
                 ocd_base.raw_cmd("my_command", timeout=4.5)
             else:
@@ -237,6 +237,8 @@ def test_raw_cmd_timeout(socket_inst_mock, use_global_timeout):
             "Did not receive the complete command response " "within 4.5 seconds."
         )
         assert expected_msg in str(e)
+        assert e.value.raw_cmd == "my_command"
+        assert e.value.timeout == 4.5
 
     assert not ocd_base.is_connected()
 

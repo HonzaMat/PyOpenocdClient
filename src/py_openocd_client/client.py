@@ -7,7 +7,7 @@ from typing import Any, List, Optional, Tuple, Type
 
 from .baseclient import _PyOpenocdBaseClient
 from .bp_parser import _BpParser
-from .errors import OcdCommandError, OcdCommandInvalidResponse
+from .errors import OcdCommandFailedError, OcdInvalidResponseError, _OcdParsingError
 from .types import BpInfo, OcdCommandResult, WpInfo, WpType
 from .wp_parser import _WpParser
 
@@ -61,35 +61,37 @@ class PyOpenocdClient:
         timeout: Optional[float] = None,
     ) -> OcdCommandResult:
         if capture:
-            full_cmd = "capture { " + cmd + " }"
+            raw_cmd = "capture { " + cmd + " }"
         else:
-            full_cmd = cmd
+            raw_cmd = cmd
 
-        full_cmd = "set CMD_RETCODE [ catch { " + full_cmd + " } CMD_OUTPUT ] ; "
-        full_cmd += 'return "$CMD_RETCODE $CMD_OUTPUT" ; '
+        raw_cmd = "set CMD_RETCODE [ catch { " + raw_cmd + " } CMD_OUTPUT ] ; "
+        raw_cmd += 'return "$CMD_RETCODE $CMD_OUTPUT" ; '
 
-        raw_result = self.raw_cmd(full_cmd, timeout=timeout)
+        raw_result = self.raw_cmd(raw_cmd, timeout=timeout)
 
-        # Verify the raw output has the expected format, which can be one of:
-        # - command return code (positive or negative decimal number) and that's it
-        # - or command return code (positive or negative decimal number) followed by
-        #   a space character and optionally the command output
+        # Verify the raw output of the has the expected format. It can be:
+        #
+        # - Command return code (positive or negative decimal number) and that's it.
+        #
+        # - Or, command return code (positive or negative decimal number) followed by
+        #   a space character and optionally the command's textual output.
         if re.match(r"^-?\d+($| )", raw_result) is None:
-            raise OcdCommandInvalidResponse(
+            msg = (
                 "Received unexpected response from OpenOCD. "
                 "It looks like OpenOCD misbehaves. "
-                "The response was: " + repr(raw_result)
             )
+            raise OcdInvalidResponseError(msg, raw_cmd, raw_result)
 
         raw_result_parts = raw_result.split(" ", maxsplit=1)
         assert len(raw_result_parts) in [1, 2]
         retcode = int(raw_result_parts[0], 10)
         out = raw_result_parts[1] if len(raw_result_parts) == 2 else ""
 
-        result = OcdCommandResult(cmd=cmd, full_cmd=full_cmd, retcode=retcode, out=out)
+        result = OcdCommandResult(cmd=cmd, raw_cmd=raw_cmd, retcode=retcode, out=out)
 
         if throw and result.retcode != 0:
-            raise OcdCommandError(result)
+            raise OcdCommandFailedError(result)
 
         return result
 
@@ -129,8 +131,16 @@ class PyOpenocdClient:
     def get_reg(self, reg_name: str, force: bool = False) -> int:
         force_arg = "-force " if force else ""
         cmd = f"dict get [ get_reg {force_arg}{reg_name} ] {reg_name}"
-        reg_value = self.cmd(cmd).out.strip()
-        return int(reg_value, 0)
+
+        result = self.cmd(cmd)
+        reg_value = result.out.strip()
+
+        try:
+            # Expecting a single hexadecimal number on the output
+            return int(reg_value, 16)
+        except ValueError as e:
+            msg = "Obtained invalid number from get_reg command"
+            raise OcdInvalidResponseError(msg, result.raw_cmd, result.out) from e
 
     def set_reg(self, reg_name: str, reg_value: int, force: bool = False) -> None:
         force_arg = "-force " if force else ""
@@ -155,6 +165,9 @@ class PyOpenocdClient:
         phys: bool = False,
         timeout: Optional[float] = None,
     ) -> List[int]:
+        # FIXME: Change the type annotation of "bit_width" to "Literal[8, 16, 32, 64]"
+        # once support of Python 3.7 is dropped.
+
         self._check_memory_access_params(addr, bit_width)
         if count < 1:
             raise ValueError("Count must be 1 or higher")
@@ -162,24 +175,24 @@ class PyOpenocdClient:
         cmd = f"read_memory {hex(addr)} {bit_width} {count}"
         if phys:
             cmd += " phys"
-        out = self.cmd(cmd, timeout=timeout).out.strip()
+        result = self.cmd(cmd, timeout=timeout)
+        out = result.out.strip()
 
         values_str = out.split(" ")
 
         # Safety validation of the command output
         if len(values_str) != count:
-            raise ValueError(
+            msg = (
                 "OpenOCD's read_memory command provided different number of values "
                 f"than requested (expected {count} but obtained {len(values_str)})."
             )
+            raise OcdInvalidResponseError(msg, result.raw_cmd, result.out)
 
         # Safety validation, cont'd
         hex_regex = r"^0x[0-9a-fA-F]+$"
         if any(re.match(hex_regex, v) is None for v in values_str):
-            raise ValueError(
-                "Unexpected output from OpenOCD's read_memory command - "
-                "found an item that is not a valid hexadecimal number"
-            )
+            msg = "Found an item that is not a valid hexadecimal number"
+            raise OcdInvalidResponseError(msg, result.raw_cmd, result.out)
 
         # str -> int
         values = [int(v, 16) for v in values_str]
@@ -206,6 +219,9 @@ class PyOpenocdClient:
         phys: bool = False,
         timeout: Optional[float] = None,
     ) -> None:
+        # FIXME: Change the type annotation of "bit_width" to "Literal[8, 16, 32, 64]"
+        # once support of Python 3.7 is dropped.
+
         self._check_memory_access_params(addr, bit_width)
         self._check_memory_write_values(values, bit_width)
 
@@ -215,9 +231,13 @@ class PyOpenocdClient:
         self.cmd(cmd, timeout=timeout).out.strip()
 
     def list_bp(self) -> List[BpInfo]:
-        out = self.cmd("bp").out.strip()
-        bp_lines = out.splitlines()
-        return [_BpParser.parse_bp_entry(line) for line in bp_lines]
+        result = self.cmd("bp")
+        bp_lines = result.out.strip().splitlines()
+        try:
+            return [_BpParser.parse_bp_entry(line) for line in bp_lines]
+        except _OcdParsingError as e:
+            msg = "Could not parse the output of 'bp' command"
+            raise OcdInvalidResponseError(msg, result.raw_cmd, result.out) from e
 
     def add_bp(self, addr: int, size: int, hw: bool = False) -> None:
         cmd = "bp " + hex(addr) + " " + str(size)
@@ -232,9 +252,13 @@ class PyOpenocdClient:
         self.cmd("rbp all")
 
     def list_wp(self) -> List[WpInfo]:
-        out = self.cmd("wp").out.strip()
-        wp_lines = out.splitlines()
-        return [_WpParser().parse_wp_entry(line) for line in wp_lines]
+        result = self.cmd("wp")
+        wp_lines = result.out.splitlines()
+        try:
+            return [_WpParser().parse_wp_entry(line) for line in wp_lines]
+        except _OcdParsingError as e:
+            msg = "Could not parse the output of 'wp' command"
+            raise OcdInvalidResponseError(msg, result.raw_cmd, result.out) from e
 
     def add_wp(self, addr: int, size: int, wp_type: WpType = WpType.ACCESS) -> None:
         cmd = "wp " + hex(addr) + " " + str(size) + " " + str(wp_type.value)
@@ -253,15 +277,14 @@ class PyOpenocdClient:
         return self.cmd("version").out.strip()
 
     def version_tuple(self) -> Tuple[int, int, int]:
-        version_str = self.version()
-        version_regex = r"Open On\-Chip Debugger (\d+)\.(\d+)\.(\d+)"
+        result = self.cmd("version")
+        version_str = result.out.strip()
 
+        version_regex = r"Open On\-Chip Debugger (\d+)\.(\d+)\.(\d+)"
         match = re.search(version_regex, version_str)
         if match is None:
-            raise ValueError(
-                "Unable to parse the version string received "
-                "from OpenOCD: {version_str}"
-            )
+            msg = "Unable to parse the version string received from OpenOCD"
+            raise OcdInvalidResponseError(msg, result.raw_cmd, result.out)
 
         major = int(match.group(1))
         minor = int(match.group(2))
@@ -282,7 +305,7 @@ class PyOpenocdClient:
         self.disconnect()
 
     def shutdown(self) -> None:
-        self.cmd(
-            "shutdown", throw=False
-        )  # OpenOCD's shutdown command returns a non-zero error code
+        # OpenOCD's shutdown command returns a non-zero error code (which is expected).
+        # For that reason, throw=False is used.
+        self.cmd("shutdown", throw=False)
         self.disconnect()

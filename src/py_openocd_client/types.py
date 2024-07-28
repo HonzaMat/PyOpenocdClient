@@ -13,7 +13,7 @@ class OcdCommandResult:
 
     retcode: int
     cmd: str
-    full_cmd: str
+    raw_cmd: str
     out: str
 
 

@@ -5,7 +5,7 @@ import socket
 import time
 from typing import Optional
 
-from .errors import OcdCommandTimeout, OcdConnectionError
+from .errors import OcdCommandTimeoutError, OcdConnectionError
 
 
 class _PyOpenocdBaseClient:
@@ -105,28 +105,30 @@ class _PyOpenocdBaseClient:
                 "the command was even sent."
             )
 
-    def _do_send_cmd(self, cmd: str) -> None:
+    def _do_send_cmd(self, raw_cmd: str) -> None:
         assert self.is_connected()
         assert self._socket is not None
 
         # Safety:
         self._check_no_premature_recvd_bytes()
 
-        data = cmd.encode(self.CHARSET) + self.COMMAND_DELIMITER
+        data = raw_cmd.encode(self.CHARSET) + self.COMMAND_DELIMITER
         self._socket.settimeout(self.SEND_TIMEOUT)
         self._socket.send(data)
 
-    def _do_recv_response(self, timeout: Optional[float] = None) -> str:
+    def _do_recv_response(self, raw_cmd: str, timeout: Optional[float] = None) -> str:
         assert self.is_connected()
         assert self._socket is not None
 
         recv_data = b""
-        curr_timeout = timeout if timeout is not None else self._default_recv_timeout
+        effective_timeout = (
+            timeout if timeout is not None else self._default_recv_timeout
+        )
 
         self._socket.settimeout(self.RECV_POLL_TIMEOUT)
 
         time_start = time.time()
-        while time.time() < (time_start + curr_timeout):
+        while time.time() < (time_start + effective_timeout):
             try:
                 d = self._socket.recv(self.RECV_BLOCK_SIZE)
             except socket.timeout:
@@ -156,12 +158,13 @@ class _PyOpenocdBaseClient:
                 return recv_data.decode(self.CHARSET)
 
         # Timed out
-        raise OcdCommandTimeout(
+        msg = (
             "Did not receive the complete command response "
-            f"within {curr_timeout} seconds."
+            f"within {effective_timeout} seconds."
         )
+        raise OcdCommandTimeoutError(msg, raw_cmd, effective_timeout)
 
-    def raw_cmd(self, cmd: str, timeout: Optional[float] = None) -> str:
+    def raw_cmd(self, raw_cmd: str, timeout: Optional[float] = None) -> str:
         if (timeout is not None) and (timeout <= 0):
             raise ValueError(
                 "Timeout must be positive float number "
@@ -172,9 +175,9 @@ class _PyOpenocdBaseClient:
             raise OcdConnectionError("Not connected")
 
         try:
-            self._do_send_cmd(cmd)
-            return self._do_recv_response(timeout=timeout)
-        except (OcdCommandTimeout, OcdConnectionError):
+            self._do_send_cmd(raw_cmd)
+            return self._do_recv_response(raw_cmd, timeout=timeout)
+        except (OcdCommandTimeoutError, OcdConnectionError):
             # Connection error -> disconnect.
             # Timeout -> disconnect too. This is essential to avoid any
             # late-arriving data to be interpreted as response to

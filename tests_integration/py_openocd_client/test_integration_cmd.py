@@ -4,7 +4,11 @@ import time
 
 import pytest
 
-from py_openocd_client import OcdCommandError, OcdCommandTimeout, PyOpenocdClient
+from py_openocd_client import (
+    OcdCommandFailedError,
+    OcdCommandTimeoutError,
+    PyOpenocdClient,
+)
 
 
 def test_basic(openocd_process):
@@ -45,7 +49,7 @@ def test_echo_with_capture(openocd_process):
 
 def test_failed_cmd(openocd_process):
     with PyOpenocdClient() as ocd:
-        with pytest.raises(OcdCommandError) as e:
+        with pytest.raises(OcdCommandFailedError) as e:
             ocd.cmd("some_nonexistent_cmd some_arg")
 
         assert e.value.result.retcode != 0
@@ -63,7 +67,7 @@ def test_failed_cmd_2(openocd_process):
         else:
             expected_retcode = 77
 
-        with pytest.raises(OcdCommandError) as e:
+        with pytest.raises(OcdCommandFailedError) as e:
             ocd.cmd("return -level 0 -code 77 {some text}")
 
         assert e.value.result.retcode == expected_retcode
@@ -80,7 +84,7 @@ def test_failed_cmd_negative_retcode(openocd_process):
         else:
             expected_retcode = -200
 
-        with pytest.raises(OcdCommandError) as e:
+        with pytest.raises(OcdCommandFailedError) as e:
             ocd.cmd("return -level 0 -code -200 {some text}")
 
         assert e.value.result.retcode == expected_retcode
@@ -120,8 +124,15 @@ def test_timeout_ok(openocd_process):
 
 def test_timeout_exceeded(openocd_process):
     with PyOpenocdClient() as ocd:
-        with pytest.raises(OcdCommandTimeout):
+        with pytest.raises(OcdCommandTimeoutError) as e:
             ocd.cmd("sleep 2000", timeout=1.0)
+
+        expected_raw_cmd = (
+            "set CMD_RETCODE [ catch { sleep 2000 } CMD_OUTPUT ] ; "
+            'return "$CMD_RETCODE $CMD_OUTPUT" ; '
+        )
+        assert e.value.raw_cmd == expected_raw_cmd
+        assert e.value.timeout == 1.0
 
         # Timeout causes disconnection
         assert not ocd.is_connected()

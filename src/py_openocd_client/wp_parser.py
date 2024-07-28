@@ -2,6 +2,7 @@
 
 import re
 
+from .errors import _OcdParsingError
 from .types import WpInfo, WpType
 
 
@@ -31,7 +32,7 @@ class _WpParser:
 
         match = re.match(new_format, line)
         if match is None:
-            raise ValueError(
+            raise _OcdParsingError(
                 "Could not parse this entry from the 'wp' command output: " + line
             )
 

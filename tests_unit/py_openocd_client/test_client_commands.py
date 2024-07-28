@@ -8,6 +8,7 @@ from py_openocd_client import (
     BpInfo,
     BpType,
     OcdCommandResult,
+    OcdInvalidResponseError,
     PyOpenocdClient,
     WpInfo,
     WpType,
@@ -26,7 +27,7 @@ def ocd() -> PyOpenocdClient:
 
 def _prepare_command_result(out) -> OcdCommandResult:
     return OcdCommandResult(
-        retcode="0", cmd="don't care", full_cmd="don't care", out=out
+        retcode="0", cmd="cmd_placeholder", raw_cmd="raw_cmd_placeholder", out=out
     )
 
 
@@ -99,6 +100,20 @@ def test_get_reg(ocd):
     ocd.cmd.return_value = _prepare_command_result("0xaaaa")
     assert ocd.get_reg("sp", force=True) == 0xAAAA
     ocd.cmd.assert_called_once_with("dict get [ get_reg -force sp ] sp")
+
+
+def test_get_reg_error(ocd):
+    ocd.cmd.return_value = _prepare_command_result("0xKLM")
+    with pytest.raises(OcdInvalidResponseError) as e:
+        ocd.get_reg("ra")
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
+    assert e.value.out == "0xKLM"
+
+    ocd.cmd.return_value = _prepare_command_result("0x1234 0x5678")
+    with pytest.raises(OcdInvalidResponseError) as e:
+        ocd.get_reg("pc")
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
+    assert e.value.out == "0x1234 0x5678"
 
 
 def test_set_reg(ocd):
@@ -215,15 +230,21 @@ def test_write_memory_argument_errors(ocd):
 def test_read_memory_response_errors(ocd):
     # Pretend that only 3 values were returned instead of requested 8
     ocd.cmd.return_value = _prepare_command_result("0x1111 0x2222 0x3333")
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(OcdInvalidResponseError) as e:
         ocd.read_memory(0x1234, 16, count=8)
+
     assert "different number of values than requested" in str(e)
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
+    assert e.value.out == "0x1111 0x2222 0x3333"
 
     # Pretend that we received an invalid number
     ocd.cmd.return_value = _prepare_command_result("0x1111 0xKLM")
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(OcdInvalidResponseError) as e:
         ocd.read_memory(0x5678, 16, count=2)
+
     assert "not a valid hexadecimal number" in str(e)
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
+    assert e.value.out == "0x1111 0xKLM"
 
 
 def test_list_bp_empty(ocd):
@@ -245,6 +266,22 @@ def test_list_bp_not_empty(ocd):
         addr=0x10110FF0, size=2, bp_type=BpType.SW, orig_instr=0xABCD
     )
     ocd.cmd.assert_called_once_with("bp")
+
+
+def test_list_bp_invalid_response(ocd):
+    bp_command_output = (
+        "Hardware breakpoint(IVA): addr=0x10220000, len=0x2, num=0\n"
+        "Software breakpoint(IVA): muhehe"
+    )
+
+    ocd.cmd.return_value = _prepare_command_result(bp_command_output)
+    with pytest.raises(OcdInvalidResponseError) as e:
+        ocd.list_bp()
+
+    ocd.cmd.assert_called_once_with("bp")
+
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
+    assert e.value.out == bp_command_output
 
 
 def test_add_bp(ocd):
@@ -298,6 +335,22 @@ def test_list_wp_non_empty(ocd):
     )
 
 
+def test_list_wp_invalid_response(ocd):
+    wp_command_output = (
+        "address: 0x10002000, len: 0x00000004, r/w/a: r, value: 0x00000000, mask: 0xffffffffffffffff\n"  # noqa: E501
+        "address: 0x10002800, len: not_a_number, r/w/a: w, value: 0x00000000, mask: 0xffffffffffffffff\n"  # noqa: E501
+    )
+
+    ocd.cmd.return_value = _prepare_command_result(wp_command_output)
+    with pytest.raises(OcdInvalidResponseError) as e:
+        ocd.list_wp()
+
+    ocd.cmd.assert_called_once_with("wp")
+
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
+    assert e.value.out == wp_command_output
+
+
 def test_add_wp(ocd):
     ocd.add_wp(0x2001000, 2)
     ocd.cmd.assert_called_once_with("wp 0x2001000 2 a")
@@ -337,29 +390,31 @@ def test_version(ocd):
 
 
 def test_version_tuple(ocd):
-    ocd.version = mock.Mock()
-    ocd.version.return_value = "Open On-Chip Debugger 11.12.13 blah blah"
+    version_str = "Open On-Chip Debugger 11.12.13 blah blah"
+    ocd.cmd.return_value = _prepare_command_result(version_str)
     assert ocd.version_tuple() == (11, 12, 13)
 
 
 def test_version_tuple_2(ocd):
-    ocd.version = mock.Mock()
-    ocd.version.return_value = "My Little Open On-Chip Debugger 2.3.4 blah blah"
+    version_str = "My Little Open On-Chip Debugger 2.3.4 blah blah"
+    ocd.cmd.return_value = _prepare_command_result(version_str)
     assert ocd.version_tuple() == (2, 3, 4)
 
 
 def test_version_tuple_3(ocd):
-    ocd.version = mock.Mock()
-    ocd.version.return_value = "xPack Open On-Chip Debugger 0.12.0+dev-01557-gdd1758272-dirty (2024-04-02-07:27)"  # noqa: E501
+    version_str = "xPack Open On-Chip Debugger 0.12.0+dev-01557-gdd1758272-dirty (2024-04-02-07:27)"  # noqa: E501
+    ocd.cmd.return_value = _prepare_command_result(version_str)
     assert ocd.version_tuple() == (0, 12, 0)
 
 
 def test_version_tuple_error(ocd):
-    ocd.version = mock.Mock()
-    ocd.version.return_value = "Open On-Chip Debugger 9a.10b.11 blah blah"
-    with pytest.raises(ValueError) as e:
+    version_str = "Open On-Chip Debugger 9a.10b.11 blah blah"
+    ocd.cmd.return_value = _prepare_command_result(version_str)
+    with pytest.raises(OcdInvalidResponseError) as e:
         ocd.version_tuple()
     assert "Unable to parse the version string received from OpenOCD" in str(e)
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
+    assert e.value.out == version_str
 
 
 def test_target_names(ocd):
