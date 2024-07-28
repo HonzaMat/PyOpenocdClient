@@ -2,10 +2,10 @@
 
 from .client import PyOpenocdClient  # noqa: F401
 from .errors import (  # noqa: F401
-    OcdCommandError,
-    OcdCommandInvalidResponse,
-    OcdCommandTimeout,
+    OcdBaseException,
+    OcdCommandFailedError,
+    OcdCommandTimeoutError,
     OcdConnectionError,
-    OcdError,
+    OcdInvalidResponseError,
 )
 from .types import BpInfo, BpType, OcdCommandResult, WpInfo, WpType  # noqa: F401

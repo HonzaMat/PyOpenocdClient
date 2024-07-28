@@ -3,6 +3,7 @@
 import pytest
 
 from py_openocd_client import WpType
+from py_openocd_client.errors import _OcdParsingError
 from py_openocd_client.wp_parser import _WpParser
 
 
@@ -35,6 +36,6 @@ def test_parse_wp_entry_2():
 
 
 def test_parse_wp_entry_error():
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(_OcdParsingError) as e:
         _WpParser.parse_wp_entry("malformed wp entry")
     assert "Could not parse" in str(e)

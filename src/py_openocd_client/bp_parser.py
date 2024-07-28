@@ -3,6 +3,7 @@
 import re
 from typing import Optional
 
+from .errors import _OcdParsingError
 from .types import BpInfo, BpType
 
 
@@ -37,7 +38,7 @@ class _BpParser:
                 # Successfully parsed item
                 return bp_info
 
-        raise ValueError(
+        raise _OcdParsingError(
             "Could not parse this entry from the 'bp' command output: " + line
         )
 

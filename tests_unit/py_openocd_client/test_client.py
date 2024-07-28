@@ -5,8 +5,8 @@ from unittest import mock
 import pytest
 
 from py_openocd_client import (
-    OcdCommandError,
-    OcdCommandInvalidResponse,
+    OcdCommandFailedError,
+    OcdInvalidResponseError,
     PyOpenocdClient,
 )
 
@@ -166,7 +166,7 @@ def test_cmd_exception(baseclient_inst_mock):
 
     # Try executing the command and getting the exception
     baseclient_inst_mock.raw_cmd.return_value = raw_cmd_out
-    with pytest.raises(OcdCommandError) as exc_info:
+    with pytest.raises(OcdCommandFailedError) as exc_info:
         ocd.cmd(cmd)
 
     e = exc_info.value
@@ -180,7 +180,8 @@ def test_cmd_exception(baseclient_inst_mock):
     )
     baseclient_inst_mock.reset_mock()
 
-    # Try executing the same command, but with OcdCommandError exception suppressed
+    # Try executing the same command, but with OcdCommandFailedError
+    # exception suppressed.
     res = ocd.cmd(cmd, throw=False)
     assert res.retcode == 138
     assert res.cmd == cmd
@@ -217,7 +218,7 @@ def test_cmd_negative_retcode(baseclient_inst_mock):
     baseclient_inst_mock.raw_cmd.return_value = "-123 some output"
 
     ocd = PyOpenocdClient()
-    with pytest.raises(OcdCommandError) as e:
+    with pytest.raises(OcdCommandFailedError) as e:
         ocd.cmd("some_cmd")
 
     assert e.value.result.retcode == -123
@@ -228,17 +229,28 @@ def test_cmd_invalid_responses(baseclient_inst_mock):
     ocd = PyOpenocdClient()
 
     baseclient_inst_mock.raw_cmd.return_value = ""
-    with pytest.raises(OcdCommandInvalidResponse):
+    with pytest.raises(OcdInvalidResponseError) as e:
         ocd.cmd("cmd")
 
+    expected_full_cmd = (
+        "set CMD_RETCODE [ "
+        "catch { cmd } CMD_OUTPUT ] ; "
+        'return "$CMD_RETCODE $CMD_OUTPUT" ; '
+    )
+    assert e.value.full_cmd == expected_full_cmd
+    assert e.value.out == ""
+
     baseclient_inst_mock.raw_cmd.return_value = "a"
-    with pytest.raises(OcdCommandInvalidResponse):
+    with pytest.raises(OcdInvalidResponseError):
         ocd.cmd("cmd")
 
     baseclient_inst_mock.raw_cmd.return_value = "abc def"
-    with pytest.raises(OcdCommandInvalidResponse):
+    with pytest.raises(OcdInvalidResponseError):
         ocd.cmd("cmd")
 
     baseclient_inst_mock.raw_cmd.return_value = "56a some output"
-    with pytest.raises(OcdCommandInvalidResponse):
+    with pytest.raises(OcdInvalidResponseError) as e:
         ocd.cmd("cmd")
+
+    assert e.value.full_cmd == expected_full_cmd
+    assert e.value.out == "56a some output"

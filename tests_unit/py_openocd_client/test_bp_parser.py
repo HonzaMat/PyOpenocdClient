@@ -4,6 +4,7 @@ import pytest
 
 from py_openocd_client import BpType
 from py_openocd_client.bp_parser import _BpParser
+from py_openocd_client.errors import _OcdParsingError
 
 
 def test_parse_bp_entry_sw():
@@ -86,7 +87,7 @@ def test_parse_bp_entry_error():
     """
 
     malformed_entry = "Software bre__XYZ__k(IVA): addr=0x0, len=0x8, orig_instr=0x1"
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(_OcdParsingError) as e:
         _BpParser.parse_bp_entry(malformed_entry)
 
     assert "Could not parse" in str(e)

@@ -2,7 +2,7 @@
 
 import pytest
 
-from py_openocd_client import OcdCommandTimeout, PyOpenocdClient
+from py_openocd_client import OcdCommandTimeoutError, PyOpenocdClient
 
 
 def test_no_output(openocd_process):
@@ -87,5 +87,8 @@ def test_raw_cmd_timeout_ok(openocd_process):
 
 def test_raw_cmd_timeout_exceeded(openocd_process):
     with PyOpenocdClient() as ocd:
-        with pytest.raises(OcdCommandTimeout):
+        with pytest.raises(OcdCommandTimeoutError) as e:
             ocd.raw_cmd("sleep 2000", timeout=1.0)
+
+        assert e.value.full_cmd == "sleep 2000"
+        assert e.value.timeout == 1.0
