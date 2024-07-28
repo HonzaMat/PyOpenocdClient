@@ -90,5 +90,5 @@ def test_raw_cmd_timeout_exceeded(openocd_process):
         with pytest.raises(OcdCommandTimeoutError) as e:
             ocd.raw_cmd("sleep 2000", timeout=1.0)
 
-        assert e.value.full_cmd == "sleep 2000"
+        assert e.value.raw_cmd == "sleep 2000"
         assert e.value.timeout == 1.0

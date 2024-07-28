@@ -27,7 +27,7 @@ def ocd() -> PyOpenocdClient:
 
 def _prepare_command_result(out) -> OcdCommandResult:
     return OcdCommandResult(
-        retcode="0", cmd="cmd_placeholder", full_cmd="full_cmd_placeholder", out=out
+        retcode="0", cmd="cmd_placeholder", raw_cmd="raw_cmd_placeholder", out=out
     )
 
 
@@ -106,13 +106,13 @@ def test_get_reg_error(ocd):
     ocd.cmd.return_value = _prepare_command_result("0xKLM")
     with pytest.raises(OcdInvalidResponseError) as e:
         ocd.get_reg("ra")
-    assert e.value.full_cmd == "full_cmd_placeholder"
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
     assert e.value.out == "0xKLM"
 
     ocd.cmd.return_value = _prepare_command_result("0x1234 0x5678")
     with pytest.raises(OcdInvalidResponseError) as e:
         ocd.get_reg("pc")
-    assert e.value.full_cmd == "full_cmd_placeholder"
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
     assert e.value.out == "0x1234 0x5678"
 
 
@@ -234,7 +234,7 @@ def test_read_memory_response_errors(ocd):
         ocd.read_memory(0x1234, 16, count=8)
 
     assert "different number of values than requested" in str(e)
-    assert e.value.full_cmd == "full_cmd_placeholder"
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
     assert e.value.out == "0x1111 0x2222 0x3333"
 
     # Pretend that we received an invalid number
@@ -243,7 +243,7 @@ def test_read_memory_response_errors(ocd):
         ocd.read_memory(0x5678, 16, count=2)
 
     assert "not a valid hexadecimal number" in str(e)
-    assert e.value.full_cmd == "full_cmd_placeholder"
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
     assert e.value.out == "0x1111 0xKLM"
 
 
@@ -280,7 +280,7 @@ def test_list_bp_invalid_response(ocd):
 
     ocd.cmd.assert_called_once_with("bp")
 
-    assert e.value.full_cmd == "full_cmd_placeholder"
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
     assert e.value.out == bp_command_output
 
 
@@ -347,7 +347,7 @@ def test_list_wp_invalid_response(ocd):
 
     ocd.cmd.assert_called_once_with("wp")
 
-    assert e.value.full_cmd == "full_cmd_placeholder"
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
     assert e.value.out == wp_command_output
 
 
@@ -413,7 +413,7 @@ def test_version_tuple_error(ocd):
     with pytest.raises(OcdInvalidResponseError) as e:
         ocd.version_tuple()
     assert "Unable to parse the version string received from OpenOCD" in str(e)
-    assert e.value.full_cmd == "full_cmd_placeholder"
+    assert e.value.raw_cmd == "raw_cmd_placeholder"
     assert e.value.out == version_str
 
 

@@ -237,7 +237,7 @@ def test_raw_cmd_timeout(socket_inst_mock, use_global_timeout):
             "Did not receive the complete command response " "within 4.5 seconds."
         )
         assert expected_msg in str(e)
-        assert e.value.full_cmd == "my_command"
+        assert e.value.raw_cmd == "my_command"
         assert e.value.timeout == 4.5
 
     assert not ocd_base.is_connected()

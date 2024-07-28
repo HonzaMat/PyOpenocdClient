@@ -28,17 +28,23 @@ class OcdCommandFailedError(OcdBaseException):
 
 
 class OcdCommandTimeoutError(OcdBaseException):
-    def __init__(self, msg: str, full_cmd: str, timeout: float):
-        self._full_cmd = full_cmd
+    def __init__(self, msg: str, raw_cmd: str, timeout: float):
+        self._raw_cmd = raw_cmd
         self._timeout = timeout
         super().__init__(msg)
 
     @property
-    def full_cmd(self) -> str:
-        return self._full_cmd
+    def raw_cmd(self) -> str:
+        """
+        Raw command that did not complete within the timeout.
+        """
+        return self._raw_cmd
 
     @property
     def timeout(self) -> float:
+        """
+        Timeout value which got exceeded.
+        """
         return self._timeout
 
 
@@ -48,17 +54,23 @@ class OcdInvalidResponseError(OcdBaseException):
     PyOpenocdClient could not understand the output form OpenOCD and parse it.
     """
 
-    def __init__(self, msg: str, full_cmd: str, out: str):
-        self._full_cmd = full_cmd
+    def __init__(self, msg: str, raw_cmd: str, out: str):
+        self._raw_cmd = raw_cmd
         self._out = out
         super().__init__(msg)
 
     @property
-    def full_cmd(self) -> str:
-        return self._full_cmd
+    def raw_cmd(self) -> str:
+        """
+        Raw command that produced the invalid response.
+        """
+        return self._raw_cmd
 
     @property
     def out(self) -> str:
+        """
+        The actual response which could not be understood and parsed.
+        """
         return self._out
 
 

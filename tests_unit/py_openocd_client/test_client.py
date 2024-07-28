@@ -100,7 +100,7 @@ def test_cmd(baseclient_inst_mock):
     ocd = PyOpenocdClient()
 
     cmd = "some_cmd arg"
-    expected_full_cmd = (
+    expected_raw_cmd = (
         "set CMD_RETCODE [ "
         "catch { some_cmd arg } "
         "CMD_OUTPUT ] ; "
@@ -113,18 +113,16 @@ def test_cmd(baseclient_inst_mock):
 
     assert result.retcode == 0
     assert result.cmd == cmd
-    assert result.full_cmd == expected_full_cmd
+    assert result.raw_cmd == expected_raw_cmd
     assert result.out == "some output\nanother line"
 
-    baseclient_inst_mock.raw_cmd.assert_called_once_with(
-        expected_full_cmd, timeout=None
-    )
+    baseclient_inst_mock.raw_cmd.assert_called_once_with(expected_raw_cmd, timeout=None)
     baseclient_inst_mock.reset_mock()
 
     # Try the same command but this time with explicit timeout
     result2 = ocd.cmd(cmd, timeout=7.5)
     assert result == result2
-    baseclient_inst_mock.raw_cmd.assert_called_once_with(expected_full_cmd, timeout=7.5)
+    baseclient_inst_mock.raw_cmd.assert_called_once_with(expected_raw_cmd, timeout=7.5)
     baseclient_inst_mock.reset_mock()
 
 
@@ -132,7 +130,7 @@ def test_cmd_capture_and_timeout(baseclient_inst_mock):
     ocd = PyOpenocdClient()
 
     cmd = "dummy_cmd"
-    expected_full_cmd = (
+    expected_raw_cmd = (
         "set CMD_RETCODE [ "
         "catch { capture { dummy_cmd } } "
         "CMD_OUTPUT ] ; "
@@ -146,17 +144,17 @@ def test_cmd_capture_and_timeout(baseclient_inst_mock):
 
     assert result.retcode == 0
     assert result.cmd == cmd
-    assert result.full_cmd == expected_full_cmd
+    assert result.raw_cmd == expected_raw_cmd
     assert result.out == "dummy output"
 
-    baseclient_inst_mock.raw_cmd.assert_called_once_with(expected_full_cmd, timeout=3.0)
+    baseclient_inst_mock.raw_cmd.assert_called_once_with(expected_raw_cmd, timeout=3.0)
 
 
 def test_cmd_exception(baseclient_inst_mock):
     ocd = PyOpenocdClient()
 
     cmd = "some_cmd_that_fails arg1 arg2"
-    expected_full_cmd = (
+    expected_raw_cmd = (
         "set CMD_RETCODE [ "
         "catch { some_cmd_that_fails arg1 arg2 } "
         "CMD_OUTPUT ] ; "
@@ -172,12 +170,10 @@ def test_cmd_exception(baseclient_inst_mock):
     e = exc_info.value
     assert e.result.retcode == 138
     assert e.result.cmd == cmd
-    assert e.result.full_cmd == expected_full_cmd
+    assert e.result.raw_cmd == expected_raw_cmd
     assert e.result.out == "some output\nof the command"
 
-    baseclient_inst_mock.raw_cmd.assert_called_once_with(
-        expected_full_cmd, timeout=None
-    )
+    baseclient_inst_mock.raw_cmd.assert_called_once_with(expected_raw_cmd, timeout=None)
     baseclient_inst_mock.reset_mock()
 
     # Try executing the same command, but with OcdCommandFailedError
@@ -185,12 +181,10 @@ def test_cmd_exception(baseclient_inst_mock):
     res = ocd.cmd(cmd, throw=False)
     assert res.retcode == 138
     assert res.cmd == cmd
-    assert res.full_cmd == expected_full_cmd
+    assert res.raw_cmd == expected_raw_cmd
     assert res.out == "some output\nof the command"
 
-    baseclient_inst_mock.raw_cmd.assert_called_once_with(
-        expected_full_cmd, timeout=None
-    )
+    baseclient_inst_mock.raw_cmd.assert_called_once_with(expected_raw_cmd, timeout=None)
 
 
 def _check_cmd_empty_output(baseclient_inst_mock, out):
@@ -233,12 +227,12 @@ def test_cmd_invalid_responses(baseclient_inst_mock):
     with pytest.raises(OcdInvalidResponseError) as e:
         ocd.cmd("some_cmd")
 
-    expected_full_cmd = (
+    expected_raw_cmd = (
         "set CMD_RETCODE [ "
         "catch { some_cmd } CMD_OUTPUT ] ; "
         'return "$CMD_RETCODE $CMD_OUTPUT" ; '
     )
-    assert e.value.full_cmd == expected_full_cmd
+    assert e.value.raw_cmd == expected_raw_cmd
     assert e.value.out == ""
 
     baseclient_inst_mock.raw_cmd.return_value = "a"
@@ -253,5 +247,5 @@ def test_cmd_invalid_responses(baseclient_inst_mock):
     with pytest.raises(OcdInvalidResponseError) as e:
         ocd.cmd("some_cmd")
 
-    assert e.value.full_cmd == expected_full_cmd
+    assert e.value.raw_cmd == expected_raw_cmd
     assert e.value.out == "56a some output"

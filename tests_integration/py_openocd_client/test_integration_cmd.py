@@ -127,11 +127,11 @@ def test_timeout_exceeded(openocd_process):
         with pytest.raises(OcdCommandTimeoutError) as e:
             ocd.cmd("sleep 2000", timeout=1.0)
 
-        expected_full_cmd = (
+        expected_raw_cmd = (
             "set CMD_RETCODE [ catch { sleep 2000 } CMD_OUTPUT ] ; "
             'return "$CMD_RETCODE $CMD_OUTPUT" ; '
         )
-        assert e.value.full_cmd == expected_full_cmd
+        assert e.value.raw_cmd == expected_raw_cmd
         assert e.value.timeout == 1.0
 
         # Timeout causes disconnection
