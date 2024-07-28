@@ -37,7 +37,7 @@ class OcdCommandFailedError(OcdBaseException):
             try:
                 res = ocd.cmd("some command")
                 print(f"Command succeeded. Output: {res.out}")
-            except OcdCommandError as e:
+            except OcdCommandFailedError as e:
                 print(f"Command failed with error code {e.result.retcode}. "
                       f"Output: {e.result.out}")
 
