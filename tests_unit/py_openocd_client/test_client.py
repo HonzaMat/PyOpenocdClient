@@ -221,6 +221,7 @@ def test_cmd_negative_retcode(baseclient_inst_mock):
     with pytest.raises(OcdCommandFailedError) as e:
         ocd.cmd("some_cmd")
 
+    assert e.value.result.cmd == "some_cmd"
     assert e.value.result.retcode == -123
     assert e.value.result.out == "some output"
 
@@ -230,11 +231,11 @@ def test_cmd_invalid_responses(baseclient_inst_mock):
 
     baseclient_inst_mock.raw_cmd.return_value = ""
     with pytest.raises(OcdInvalidResponseError) as e:
-        ocd.cmd("cmd")
+        ocd.cmd("some_cmd")
 
     expected_full_cmd = (
         "set CMD_RETCODE [ "
-        "catch { cmd } CMD_OUTPUT ] ; "
+        "catch { some_cmd } CMD_OUTPUT ] ; "
         'return "$CMD_RETCODE $CMD_OUTPUT" ; '
     )
     assert e.value.full_cmd == expected_full_cmd
@@ -242,15 +243,15 @@ def test_cmd_invalid_responses(baseclient_inst_mock):
 
     baseclient_inst_mock.raw_cmd.return_value = "a"
     with pytest.raises(OcdInvalidResponseError):
-        ocd.cmd("cmd")
+        ocd.cmd("some_cmd")
 
     baseclient_inst_mock.raw_cmd.return_value = "abc def"
     with pytest.raises(OcdInvalidResponseError):
-        ocd.cmd("cmd")
+        ocd.cmd("some_cmd")
 
     baseclient_inst_mock.raw_cmd.return_value = "56a some output"
     with pytest.raises(OcdInvalidResponseError) as e:
-        ocd.cmd("cmd")
+        ocd.cmd("some_cmd")
 
     assert e.value.full_cmd == expected_full_cmd
     assert e.value.out == "56a some output"
