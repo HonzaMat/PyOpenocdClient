@@ -70,6 +70,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+doc/py_openocd_client/_build
 
 # PyBuilder
 .pybuilder/

@@ -8,11 +8,12 @@ from .types import WpInfo, WpType
 
 class _WpParser:
     """
-    Helper class to parse items from the watchpoint list, that is
+    Internal helper class to parse items from the watchpoint list, that is,
     lines produced by the "wp" command.
 
-    The class serves as a helper for PyOpenocdClient class and is not intended
-    for direct use.
+    .. warning::
+        This class is not intended for direct use and its API
+        is not guaranteed to remain stable between releases.
     """
 
     @staticmethod

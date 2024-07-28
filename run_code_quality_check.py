@@ -79,6 +79,7 @@ def main() -> int:
         get_script_dir() / "tests_integration" / "py_openocd_client",
     ]
     utils = [
+        get_script_dir() / "build_doc.py",
         get_script_dir() / "run_code_quality_check.py",
         get_script_dir() / "run_tests.py",
     ]
