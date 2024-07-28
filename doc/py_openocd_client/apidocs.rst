@@ -9,11 +9,13 @@ PyOpenocdClient
    .. autoclass:: py_openocd_client.PyOpenocdClient
       :members:
 
+
 Command result
 --------------
 
 .. autoclass:: py_openocd_client.OcdCommandResult
    :members:
+
 
 Exceptions
 ----------
@@ -23,13 +25,14 @@ Exceptions
 
 .. autoexception:: OcdConnectionError
 
-.. autoexception:: OcdCommandTimeout
+.. autoexception:: OcdCommandTimeoutError
    :members:
 
-.. autoexception:: OcdCommandInvalidResponse
+.. autoexception:: OcdInvalidResponseError
    :members:
 
 .. autoexception:: OcdBaseException
+
 
 Other data types
 ----------------
@@ -45,6 +48,4 @@ Other data types
 
 .. autoenum:: py_openocd_client.WpType
    :members:
-
-
 
