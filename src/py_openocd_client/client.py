@@ -137,8 +137,8 @@ class PyOpenocdClient:
         ``cmd`` is the TCL command to execute, or possibly multiple TCL commands --
         a short TCL script.
 
-        ``capture`` determines whether to also obtain log entries produced by the command
-        and return it as part of the command output. (Default: False)
+        ``capture`` determines whether to also obtain log entries produced
+        by the command and return it as part of the command output. (Default: False)
 
         ``throw`` determines whether to raise :py:class:`OcdCommandFailedError` if
         the command fails. (Default: True)
