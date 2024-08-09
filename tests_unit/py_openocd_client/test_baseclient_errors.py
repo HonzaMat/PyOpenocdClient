@@ -214,6 +214,8 @@ def test_raw_cmd_too_big_response(socket_inst_mock):
 def test_raw_cmd_timeout(socket_inst_mock, use_global_timeout):
     ocd_base = _PyOpenocdBaseClient("localhost", 6666)
     ocd_base.connect()
+    assert socket_inst_mock.connect.call_count == 1
+    assert socket_inst_mock.close.call_count == 0
 
     if use_global_timeout:
         ocd_base.set_default_timeout(4.5)
@@ -224,7 +226,6 @@ def test_raw_cmd_timeout(socket_inst_mock, use_global_timeout):
         time_mock.side_effect = [10, 11, 12, 13, 14, 15]
 
         chunks_to_receive = [b"abc", b"def", socket.timeout(), b"ghi"]
-
         socket_inst_mock.recv.side_effect = chunks_to_receive
 
         with pytest.raises(OcdCommandTimeoutError) as e:
@@ -234,13 +235,54 @@ def test_raw_cmd_timeout(socket_inst_mock, use_global_timeout):
                 ocd_base.raw_cmd("my_command")
 
         expected_msg = (
-            "Did not receive the complete command response " "within 4.5 seconds."
+            "Did not receive the complete command response within 4.5 seconds."
         )
         assert expected_msg in str(e)
         assert e.value.raw_cmd == "my_command"
         assert e.value.timeout == 4.5
 
-    assert not ocd_base.is_connected()
+    # Command timeout shall trigger re-connection
+    assert ocd_base.is_connected()
+    assert socket_inst_mock.connect.call_count == 2
+    assert socket_inst_mock.close.call_count == 1
+
+
+def test_raw_cmd_reconnection_error_after_timeout(socket_inst_mock):
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
+    ocd_base.connect()
+
+    # Check that the first socket connection was established
+    socket_inst_mock.connect.assert_called_once()
+    socket_inst_mock.close.assert_not_called()
+    assert ocd_base.is_connected()
+
+    ocd_base.set_default_timeout(2.5)
+
+    with mock.patch("time.time") as time_mock:
+        time_mock.side_effect = [10, 11, 12, 13]
+
+        chunks_to_receive = [b"abc", b"def", b"ghi"]
+        socket_inst_mock.recv.side_effect = chunks_to_receive
+
+        # Prepare a second socket instance that fails on connect()
+        with mock.patch("socket.socket") as socket_mock_2:
+            socket_inst_mock_2 = mock.Mock()
+            socket_inst_mock_2.connect.side_effect = [OSError("connect() failed")]
+
+            socket_mock_2.return_value = socket_inst_mock_2
+
+            # Command timeout must cause re-connection. The reconnection will fail,
+            # resulting in OcdConnectionError.
+            with pytest.raises(OcdConnectionError) as e:
+                ocd_base.raw_cmd("my_command")
+
+            # The first socket connection must have been closed.
+            socket_inst_mock.close.assert_called_once()
+            # The second socket connection must have been attempted (but failed).
+            socket_inst_mock_2.connect.assert_called_once()
+
+        # The overall final state must be "not connected".
+        assert not ocd_base.is_connected()
 
 
 def test_socket_close_errors_suppressed(socket_inst_mock):

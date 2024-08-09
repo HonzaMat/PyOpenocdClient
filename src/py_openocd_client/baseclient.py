@@ -177,11 +177,14 @@ class _PyOpenocdBaseClient:
         try:
             self._do_send_cmd(raw_cmd)
             return self._do_recv_response(raw_cmd, timeout=timeout)
-        except (OcdCommandTimeoutError, OcdConnectionError):
-            # Connection error -> disconnect.
-            # Timeout -> disconnect too. This is essential to avoid any
-            # late-arriving data to be interpreted as response to
+        except OcdCommandTimeoutError:
+            # Timeout -> reconnect. This is essential to avoid any
+            # late-arriving data to be interpreted as a response to
             # the next command.
+            self.reconnect()
+            raise
+        except OcdConnectionError:
+            # Connection error -> disconnect.
             self._close_socket()
             raise
 
