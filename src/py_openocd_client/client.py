@@ -22,8 +22,8 @@ class PyOpenocdClient:
 
     - :meth:`cmd` method to send any TCL command to OpenOCD and obtain
       the command result,
-    - other convenience methods to issue some of the most common OpenOCD commands
-      (:meth:`halt`, :meth:`resume`, :meth:`read_memory`, :meth:`get_reg`, etc.).
+    - convenience methods to issue some of the most common OpenOCD commands --
+      :meth:`halt`, :meth:`resume`, :meth:`read_memory`, :meth:`get_reg`, ..., etc.
 
     Basic usage:
 
@@ -150,14 +150,14 @@ class PyOpenocdClient:
         suppresed by ``throw=False``.
 
         If the command timeout is exceeded while waiting for OpenOCD to provide
-        the command result, :py:class:`OcdCommandTimeout` is raised and the connection
-        is re-established (reconnected).
+        the command result, :py:class:`OcdCommandTimeoutError` is raised
+        and the connection is re-established (reconnected).
 
         If a connection error occurs during the command execution,
         :py:class:`OcdConnectionError` is raised and the connection is terminated.
 
         In the unlikely event OpenOCD responds unexpectedly (provides its response in
-        an unexpected format), :py:class:`OcdCommandInvalidResponse` is raised.
+        an unexpected format), :py:class:`OcdInvalidResponseError` is raised.
 
         .. note::
            Other convenience methods of this class (:meth:`halt`, :meth:`resume`, etc.)
