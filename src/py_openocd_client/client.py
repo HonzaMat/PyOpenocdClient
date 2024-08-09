@@ -16,13 +16,13 @@ class PyOpenocdClient:
     """
     PyOpenocdClient is the main class which forms the interface
     of the ``py_openocd_client`` package. One instance of this class
-    represents one TCL connection to an OpenOCD process.
+    represents one TCL connection to a running OpenOCD process.
 
     This class provides:
 
-    - :meth:`cmd` method to send
-      any TCL command to OpenOCD and obtain the command result,
-    - other convenience methods to issue the most frequent OpenOCD commands
+    - :meth:`cmd` method to send any TCL command to OpenOCD and obtain
+      the command result,
+    - other convenience methods to issue some of the most common OpenOCD commands
       (:meth:`halt`, :meth:`resume`, :meth:`read_memory`, :meth:`get_reg`, etc.).
 
     Basic usage:
@@ -74,9 +74,9 @@ class PyOpenocdClient:
         Establish connection to the OpenOCD instance running on *host* and *port*
         specificed in the class constructor.
 
-        Raises :py:exc:`OcdConnectionError` if:
+        Raises :py:exc:`OcdConnectionError`:
 
-        - the connection fails,
+        - if the connection fails,
         - if called on an already connected instance.
         """
         self._client_base.connect()
@@ -95,8 +95,7 @@ class PyOpenocdClient:
         """
         Terminate the current connection, if any, and establish a new one.
 
-        This is equivalent to calling :py:meth:`disconnect` and :py:meth:`connect`
-        in a sequence.
+        This is equivalent to calling :py:meth:`disconnect` and then :py:meth:`connect`.
         """
         self._client_base.reconnect()
 
@@ -138,34 +137,73 @@ class PyOpenocdClient:
         ``cmd`` is the TCL command to execute, or possibly multiple TCL commands --
         a short TCL script.
 
-        ``capture`` determines whether to also get log entries produced by the command
-        and return it as part of the command output (default: False).
+        ``capture`` determines whether to also obtain log entries produced by the command
+        and return it as part of the command output. (Default: False)
 
-        If the command fails, :py:class:`OcdCommandFailedError` is raised by default,
-        unless this behavior is suppressed by ``throw=False``.
+        ``throw`` determines whether to raise :py:class:`OcdCommandFailedError` if
+        the command fails. (Default: True)
 
         ``timeout`` can be used to override the default timeout. If it is not specified,
-        the default timeout will apply (see :py:meth:`set_default_timeout`).
+        the default timeout will apply -- see :py:meth:`set_default_timeout`.
+
+        If the command fails, :py:class:`OcdCommandFailedError` is raised, unless
+        suppresed by ``throw=False``.
 
         If the command timeout is exceeded while waiting for OpenOCD to provide
         the command result, :py:class:`OcdCommandTimeout` is raised and the connection
-        is terminated.
+        is re-established (reconnected).
 
-        If connection error occurs during the command execution,
+        If a connection error occurs during the command execution,
         :py:class:`OcdConnectionError` is raised and the connection is terminated.
 
-        In the unlikely event OpenOCD mis-behaves and responds unexpectedly (breaks
-        the protocol), :py:class:`OcdCommandInvalidResponse` is raised and
-        the connection is terminated.
+        In the unlikely event OpenOCD responds unexpectedly (provides its response in
+        an unexpected format), :py:class:`OcdCommandInvalidResponse` is raised.
+
+        .. note::
+           Other convenience methods of this class (:meth:`halt`, :meth:`resume`, etc.)
+           use internally the :py:meth:`cmd` method, and therefore can also raise
+           the above errors.
+
+        Basic usage:
+
+        .. code-block:: python
+
+            with PyOpenocdClient("localhost", 6666) as ocd:
+
+                # The simplest usage: Just execute a command and don't care
+                # about its output. Should the command fail or not finish within
+                # the timeout, an error will be raised.
+                ocd.cmd("halt")
+
+                # Second use case: Execute a command and obtain its textual output:
+                result = ocd.cmd("version")
+                print(f"Output of 'version' command was: {result.out}")
+
+        Command errors can be handled this way:
+
+        .. code-block:: python
+
+            with PyOpenocdClient("localhost", 6666) as ocd:
+
+                try:
+                    ocd.cmd("load_image path/to/your/program.elf", timeout=10.0)
+                except OcdCommandTimeoutError as e:
+                    print(f"Image loading timed out - exceeded {e.timeout} seconds")
+                except OcdCommandFailedError as e:
+                    print(
+                        "Image loading failed. "
+                        f"Return code: {e.result.retcode}. "
+                        f"OpenOCD's output: {e.result.out}"
+                    )
+                else:
+                    print("Image loading successful.")
 
         .. note::
            The :py:meth:`cmd` method wraps the user-provided command with additional
-           TCL commands (like ``catch`` and ``return``) before sending it to OpenOCD.
-           This is needed so that both the return code and the textual output of
-           the command can be obtained.
+           TCL commands (like ``catch`` and ``return``), and the resulting complex
+           command is then sent to OpenOCD. This is needed so that both the return
+           code and the textual output of the command can be obtained.
 
-        .. warning::
-           TODO - code examples, including errors and timeouts
         """
         if capture:
             raw_cmd = "capture { " + cmd + " }"
@@ -177,12 +215,12 @@ class PyOpenocdClient:
 
         raw_result = self.raw_cmd(raw_cmd, timeout=timeout)
 
-        # Verify the raw output of the has the expected format. It can be:
+        # Verify the raw output from OpenOCD the has the expected format. It can be:
         #
         # - Command return code (positive or negative decimal number) and that's it.
         #
         # - Or, command return code (positive or negative decimal number) followed by
-        #   a space character and optionally the command's textual output.
+        #   a space character and optionally followed by the command's textual output.
         if re.match(r"^-?\d+($| )", raw_result) is None:
             msg = (
                 "Received unexpected response from OpenOCD. "
@@ -204,23 +242,24 @@ class PyOpenocdClient:
 
     def set_default_timeout(self, timeout: float) -> None:
         """
-        Set the default timeout for all commands sent to OpenOCD.
+        Set the default timeout for all commands.
 
-        Some methods of this class allow to override the default timeout
-        on per-command basis.
+        Note that some methods of this class allow to explicitly override
+        the default timeout on per-command basis.
         """
         self._client_base.set_default_timeout(timeout)
 
     def halt(self) -> None:
         """
-        Halt the currently target by sending the ``halt`` command.
+        Halt the currently selected target by sending the ``halt`` command.
         """
         self.cmd("halt")
 
     def resume(self, new_pc: Optional[int] = None) -> None:
         """
-        Resume execution of the currently selected target by sending
-        the ``resume [new_pc_value]`` command.
+        Resume the currently selected target by sending the ``resume`` command.
+
+        Optionally, a differet resume address can be set by the ``new_pc`` argument.
         """
         cmd = "resume"
         if new_pc is not None:
@@ -230,7 +269,9 @@ class PyOpenocdClient:
     def step(self, new_pc: Optional[int] = None) -> None:
         """
         Perform single-step on the currently selected target by sending
-        the ``step [new_pc_value]`` command.
+        the ``step`` command.
+
+        Optionally, a differet resume address can be set by the ``new_pc`` argument.
         """
         cmd = "step"
         if new_pc is not None:
@@ -276,7 +317,7 @@ class PyOpenocdClient:
 
     def get_reg(self, reg_name: str, force: bool = False) -> int:
         """
-        Read a value of a target's register. This is a convenience wraper
+        Read the value of a target's register. This is a convenience wrapper
         over the OpenOCD's `get_reg <https://openocd.org/doc-release/html/
         General-Commands.html#index-get_005freg>`_
         command.
@@ -310,8 +351,7 @@ class PyOpenocdClient:
         shall be written.
 
         If ``force`` is set to true, the new value is written to the register
-        immediately
-        (as opposed to keeping it in the OpenOCD's internal cache).
+        immediately (as opposed to keeping it in the OpenOCD's internal cache).
         """
         force_arg = "-force " if force else ""
         cmd = f"set_reg {force_arg}{{ {reg_name} {hex(reg_value)} }}"
@@ -452,11 +492,11 @@ class PyOpenocdClient:
 
         .. warning::
            Only HW and SW breakpoints are supported by :py:meth:`list_bp`
-           at the moment. Context and hybrid breakpoints are unsupported.
+           at the moment. Context and hybrid breakpoints are not supported.
 
            You can still set and use these less common types of breakpoints
-           (by issuing your own commands via :py:meth:`cmd`)
-           but :py:meth:`list_bp` will not be able to recognize them.
+           manually (by :py:meth:`cmd`). However, :py:meth:`list_bp` will not
+           be able to recognize them.
         """
         result = self.cmd("bp")
         bp_lines = result.out.strip().splitlines()
@@ -546,7 +586,7 @@ class PyOpenocdClient:
         Print a text message on the OpenOCD's output.
 
         This is useful if the user wishses to print extra text to the OpenOCD log,
-        for example for easier subsequent log analysis.
+        for example to aid with subsequent log analysis.
         """
         self.cmd("echo {" + msg + "}")
 
@@ -566,7 +606,7 @@ class PyOpenocdClient:
         .. code-block:: python
 
             if ocd.version_tuple() >= (0, 12, 0):
-                # Some code that relies on this OpenOCD version
+                # Some code that relies on OpenOCD version at least 0.12.0
                 # ...
             else:
                 raise RuntimeError("Sorry, OpenOCD 0.12.0 or newer is required.")
@@ -613,7 +653,7 @@ class PyOpenocdClient:
         """
         Enable or disable periodic OpenOCD's polling of the target state.
 
-        OpenOCD's command ``poll on`` or ``poll off`` is used.
+        OpenOCD's commands ``poll on`` or ``poll off`` are used.
         """
         self.cmd("poll " + ("on" if enable_polling else "off"))
 
@@ -625,8 +665,8 @@ class PyOpenocdClient:
 
     def shutdown(self) -> None:
         """
-        Shut down the OpenOCD process by sending the ``shutdown`` command to it,
-        then disconnect.
+        Shut down the OpenOCD process by sending the ``shutdown`` command to it.
+        Then terminate the connection.
         """
         # OpenOCD's shutdown command returns a non-zero error code (which is expected).
         # For that reason, throw=False is used.
@@ -654,11 +694,11 @@ class PyOpenocdClient:
         commands -- a short TCL script).
 
         ``timeout`` can be used to override the timeout for this command. If not
-        specified, the default timeout will apply (see :py:meth:`set_default_timeout`).
+        specified, the default timeout will apply -- see :py:meth:`set_default_timeout`.
 
         If the command timeout is exceeded while waiting for OpenOCD to provide
-        the command result, :py:class:`OcdCommandTimeout` is raised and the connection
-        is terminated.
+        the command result, :py:class:`OcdCommandTimeoutError` is raised and
+        the connection is re-established.
 
         If connection error occurs during the command execution,
         :py:class:`OcdConnectionError` is raised and the connection is terminated.

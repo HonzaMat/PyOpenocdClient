@@ -53,15 +53,11 @@ class OcdCommandTimeoutError(OcdBaseException):
     If this exception occurs, it is advisable to:
 
     - investigate why the command execution takes long time, and/or
-    - re-connect and re-issue the command with a larger timeout.
+    - re-issue the command with a larger timeout.
 
     .. note::
-        If this exception is raised, then the connection is automatically
-        terminated.
-
-        If the user wishes to continue issuing more commands, new
-        connection needs to be established (by calling ``connect()`` or
-        ``reconnect()``).
+        If this exception occurs, then reconnection is automatically performed:
+        the current connection to OpenOCD is closed and a new one established.
 
     """
 
@@ -120,11 +116,11 @@ class OcdConnectionError(OcdBaseException):
     - OpenOCD responded unexpectedly (protocol broken)
 
     .. note::
-        If this exception is raised, then the connection is automatically
+        If this exception is raised, the connection is automatically
         terminated.
 
         If the user wishes to continue issuing more commands, new
-        connection needs to be established (by calling ``connect()`` or
+        connection needs to be established manually (by calling ``connect()`` or
         ``reconnect()``).
 
     """
@@ -136,7 +132,9 @@ class _OcdParsingError(OcdBaseException):
     """
     Internal exception that denotes a parsing error.
 
-    Not part of the public API of PyOpenocdClient. May change between releases.
+    .. warning::
+        This exception is not part of the public API of PyOpenocdClient.
+        It may change between releases.
     """
 
     pass

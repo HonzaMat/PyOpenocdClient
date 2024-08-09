@@ -1,8 +1,8 @@
 Quickstart
 ==========
 
-Installing PyOcdClient
-----------------------
+Installing PyOpenocdClient
+--------------------------
 
 .. code-block:: python
 

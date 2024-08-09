@@ -17,8 +17,8 @@ class OcdCommandResult:
     """
     Return code of the command.
 
-    Zero value means successfully completed command. Non-zero value means
-    failed command (an error during command execution).
+    Zero value means a successfully completed command. Non-zero value means
+    a failed command (an error during command execution).
     """
 
     cmd: str
@@ -32,7 +32,7 @@ class OcdCommandResult:
 
     This is typically the user-entered command (`cmd`) wrapped in other TCL commands
     so that PyOpenocdClient is able to obtain both the output and the return code
-    of the user-command.
+    of the user-entered command.
     """
 
     out: str

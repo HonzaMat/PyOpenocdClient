@@ -1,6 +1,8 @@
 API Documentation
 =================
 
+|
+
 PyOpenocdClient
 ---------------
 
@@ -9,6 +11,7 @@ PyOpenocdClient
    .. autoclass:: py_openocd_client.PyOpenocdClient
       :members:
 
+|
 
 Command result
 --------------
@@ -16,6 +19,7 @@ Command result
 .. autoclass:: py_openocd_client.OcdCommandResult
    :members:
 
+|
 
 Exceptions
 ----------
@@ -33,6 +37,7 @@ Exceptions
 
 .. autoexception:: OcdBaseException
 
+|
 
 Other data types
 ----------------

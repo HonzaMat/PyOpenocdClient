@@ -10,19 +10,17 @@ from .types import BpInfo, BpType
 class _BpParser:
     """
     Helper internal class to parse items from the breakpoint list, that is,
-    lines produced by the "bp" command.
+    lines produced by the OpenOCD's "bp" command.
 
     .. warning::
-        This class is not intended for direct use and its API
-        is not guaranteed to remain stable between releases.
+        This class is not intended for direct use.
+        Its API is not guaranteed to remain stable between releases.
     """
 
     @staticmethod
     def parse_bp_entry(line: str) -> BpInfo:
         """
         Parse one item from OpenOCD's breakpoint list.
-
-        Raise ValueError if the line cannot be parsed.
         """
         parsers = [
             _BpParser._parse_bp_entry_sw,

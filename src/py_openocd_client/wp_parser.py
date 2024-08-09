@@ -8,20 +8,18 @@ from .types import WpInfo, WpType
 
 class _WpParser:
     """
-    Internal helper class to parse items from the watchpoint list, that is,
-    lines produced by the "wp" command.
+    Internal helper class to parse items from the watchpoint list;
+    that is, lines produced by the OpenOCD's "wp" command.
 
     .. warning::
-        This class is not intended for direct use and its API
-        is not guaranteed to remain stable between releases.
+        This class is not intended for direct use.
+        Its API is not guaranteed to remain stable between releases.
     """
 
     @staticmethod
     def parse_wp_entry(line: str) -> WpInfo:
         """
         Parse one item from the OpenOCD's watchpoint list.
-
-        Raise ValueError if the item cannot be parsed.
         """
         new_format = (
             r"^address: (0x[a-fA-F0-9]+), "
