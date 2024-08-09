@@ -273,7 +273,7 @@ def test_raw_cmd_reconnection_error_after_timeout(socket_inst_mock):
 
             # Command timeout must cause re-connection. The reconnection will fail,
             # resulting in OcdConnectionError.
-            with pytest.raises(OcdConnectionError) as e:
+            with pytest.raises(OcdConnectionError):
                 ocd_base.raw_cmd("my_command")
 
             # The first socket connection must have been closed.
