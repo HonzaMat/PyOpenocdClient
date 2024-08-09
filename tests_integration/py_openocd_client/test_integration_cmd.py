@@ -134,11 +134,10 @@ def test_timeout_exceeded(openocd_process):
         assert e.value.raw_cmd == expected_raw_cmd
         assert e.value.timeout == 1.0
 
-        # Timeout causes disconnection
-        assert not ocd.is_connected()
+        # Timeout causes re-connection, we must remain connected.
+        assert ocd.is_connected()
 
-        # After re-connection, commands must again work
-        ocd.reconnect()
+        # Commands must still work
         assert "Open On-Chip Debugger" in ocd.cmd("version").out
 
 
