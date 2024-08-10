@@ -15,9 +15,9 @@ The script performs these actions:
 
 import argparse
 import os
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
 
 
 def get_script_dir() -> Path:
@@ -30,7 +30,7 @@ def get_pyproject_path() -> Path:
     return get_script_dir() / "pyproject.toml"
 
 
-def get_dist_path():
+def get_dist_path() -> Path:
     """Return path to the "dist" subdirectory."""
     return get_script_dir() / "dist"
 
@@ -38,8 +38,12 @@ def get_dist_path():
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("release_version", help="Current version of the release (e.g. 0.2.0)")
-    parser.add_argument("next_version", help="Next version to use after the release (e.g. 0.3.0-dev)")
+    parser.add_argument(
+        "release_version", help="Current version of the release (e.g. 0.2.0)"
+    )
+    parser.add_argument(
+        "next_version", help="Next version to use after the release (e.g. 0.3.0-dev)"
+    )
     return parser.parse_args()
 
 
@@ -56,7 +60,7 @@ def pyproject_set_version(version: str) -> None:
     version_replaced = False
     for i, l in enumerate(lines):
         if l.startswith("version = "):
-            lines[i] = "version = \"" + version + "\"\n"
+            lines[i] = 'version = "' + version + '"\n'
             version_replaced = True
             break
 
@@ -65,22 +69,21 @@ def pyproject_set_version(version: str) -> None:
             "Could not find and replace version string "
             f"in file {get_pyproject_path()}"
         )
-    
+
     get_pyproject_path().write_text("".join(lines))
 
 
-
-def git_add(file_list) -> None:
+def git_add(file_list: list[Path]) -> None:
     """Add file to the git staging."""
-    subprocess.check_call(["git", "add"] + file_list)
+    subprocess.check_call(["git", "add"] + [str(f) for f in file_list])
 
 
-def git_commit(msg) -> None:
+def git_commit(msg: str) -> None:
     """Make a git commit."""
     subprocess.check_call(["git", "commit", "-m", msg, "-S"])
 
 
-def git_tag(tag_name) -> None:
+def git_tag(tag_name: str) -> None:
     """Make a git tag."""
     subprocess.check_call(["git", "tag", tag_name, "-s", "-m", ""])
 
@@ -99,7 +102,9 @@ def main() -> int:
         raise RuntimeError("Repository contains uncommited changes")
 
     if get_dist_path().exists() and any(get_dist_path().iterdir()):
-        raise RuntimeError("dist subdirectory exists and is non-empty, refusing to overwrite it")
+        raise RuntimeError(
+            "dist subdirectory exists and is non-empty, refusing to overwrite it"
+        )
 
     # Set version to release version
     pyproject_set_version(args.release_version)

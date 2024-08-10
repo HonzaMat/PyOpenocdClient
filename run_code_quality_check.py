@@ -81,6 +81,7 @@ def main() -> int:
     utils = [
         get_script_dir() / "run_code_quality_check.py",
         get_script_dir() / "run_tests.py",
+        get_script_dir() / "make_release.py",
     ]
 
     run_tool_isort(args.edit, srcs + tests + utils)
