@@ -18,7 +18,7 @@ jobs:
       - name: Build OpenOCD ${{ matrix.openocd_version }}
         run: |
           mkdir -p oocd-build && cd oocd-build
-          python3 ../tests_integration/py_openocd_client/build_openocd.py ${{ matrix.openocd_version }}
+          python3 ../tests_integration/build_openocd.py ${{ matrix.openocd_version }}
 
       - name: Install pytest
         run: |
