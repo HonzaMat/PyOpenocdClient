@@ -58,7 +58,7 @@ def run_integration_tests(openocd_path: Path, enable_coverage: bool) -> None:
     pytest_args = [
         "-m",
         "pytest",
-        "tests_integration/py_openocd_client/",
+        "tests_integration/",
         "-vv",
         "--openocd-path",
         str(openocd_path),
