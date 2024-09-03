@@ -4,35 +4,174 @@ Quickstart
 Installing PyOpenocdClient
 --------------------------
 
-.. code-block:: python
+Use Pip to download and install PyOpenocdClient from the PyPI repository:
 
-    # TODO
+.. code-block:: bash
+
+    $ python3 -m pip install PyOpenocdClient
+
+Alternatively, advanced users may find the source code of PyOpenocdClient
+in the project repository: https://github.com/HonzaMat/PyOpenocdClient/.
 
 
 How to use
 ----------
 
-.. code-block:: python
-
-    # TODO - direct usage
-
+Basic usage
+^^^^^^^^^^^
 
 .. code-block:: python
 
-    # TODO - usage via context manager
+    from py_openocd_client import PyOpenocdClient
+
+    # Create an instance of PyOpenocdClient and supply the host and port
+    # on which OpenOCD listens for TCL commands:
+    ocd = PyOpenocdClient(host="some_hostname", port=1234)  # default is localhost:6666
+
+    # Establish the connection to OpenOCD:
+    ocd.connect()
+
+    # Now interact with OpenOCD. For example:
+    ocd.reset_halt()
+    ocd.cmd("load_image path/to/program.elf")
+    ocd.resume()
+    # ...
+
+    # Disconnect when done:
+    ocd.disconnect()
+
+Usage via context manager
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+PyOpenocdClient can be used conveniently via a context manager (Python's ``with`` block).
+Context manager handles the connect and disconnect automatically:
 
 .. code-block:: python
 
-    # TODO - use convenience methods
+    from py_openocd_client import PyOpenocdClient
+
+    # When PyOpenocdClient is used in context manager, the connection is established
+    # automatically. No need to call ocd.connect().
+    with PyOpenocdClient(host="some_hostname", port=1234) as ocd:
+
+        # Now interact with OpenOCD. For example:
+        ocd.reset_halt()
+        ocd.cmd("load_image path/to/program.elf")
+        ocd.resume()
+        # ...
+
+        # No need to call ocd.disconnect() at the end.
+        # The context manager performs the disconnection automatically.
+
+Execuing arbitrary commands
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It is possible to send any TCL command to OpenOCD via the
+:py:meth:`cmd()<py_openocd_client.PyOpenocdClient.cmd>` method.
+When the command completes successfully, an instance of
+:py:class:`OcdCommandResult<py_openocd_client.OcdCommandResult>` is returned.
+If the command fails, :py:meth:`OcdCommandFailedError<py_openocd_client.OcdCommandFailedError>`
+gets raised.
 
 .. code-block:: python
 
-    # TODO - send custom commands and inspect results
+    from py_openocd_client import PyOpenocdClient, OcdCommandFailedError
+
+    with PyOpenocdClient(host="localhost", port=6666) as ocd:
+
+        # Execute a single command, don't care about its output:
+        ocd.cmd("poll off")
+
+        # Execute a command and obtain its textual output:
+        result = ocd.cmd("version")
+        print(f"OpenOCD version is: {result.out}")
+
+        # Execute a command and handle its possible failure:
+        try:
+            result = ocd.cmd("load_image path/to/program.elf")
+        except OcdCommandFailedError as e:
+            print("Image loading failed. "
+                  f"Command error code: {e.result.retcode}. "
+                  f"Command message: {e.result.out}.")
+        else:
+            print(f"Image loading successful. Command message: {result.out}")
+
+
+Using convenience methods
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Most frequent OpenOCD commands have their own dedicated methods for easier use.
+Therefore it is not necessary to use the :py:meth:`cmd()<py_openocd_client.PyOpenocdClient.cmd>`
+method to execute them.
+
+Several of the convenience methods are shown below. Please refer to the :ref:`api_doc`
+for the full list.
 
 .. code-block:: python
 
-    # TODO - handle failed commands
+    from py_openocd_client import PyOpenocdClient
+
+    with PyOpenocdClient(host="localhost", port=6666) as ocd:
+
+        # Examples of several of the convenience methods:
+
+        # Read and write processor registers
+        pc_value = ocd.get_reg("pc")
+        print(f"The value of the PC register is: {hex(pc_value)}")
+
+        ocd.set_reg("x1", 0x1234)
+
+        # Read and write memory
+        mem_data = ocd.read_memory(0x1000, 32, 8)
+        print(f"Eight 32-bit words starting at memory address 0x1000: {mem_data}")
+
+        ocd.write_memory(0x2000, 16, [0x1234, 0x5678, 0xabcd])
+
+        # Place or remove a breakpoint
+        ocd.add_bp(0x2001000, 4, hw=True)
+        ocd.remove_bp(0x2001000)
+
+        # Halting, resuming and reset
+        ocd.resume()
+        ocd.halt()
+        ocd.reset_halt()
+
+        # Check target state
+        if ocd.is_halted():
+            print("The target is halted")
+
+        # Logging
+        ocd.echo("A custom message to show in OpenOCD log")
+
+        # Terminate OpenOCD
+        ocd.shutdown()
+
+Handling command timeouts
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If execution of a command takes too long,
+:py:class:`OcdCommandTimeoutError<py_openocd_client.OcdCommandTimeoutError>`
+gets raised.
+
+The global timeout -- applicable to all commands sent via PyOpenocdClient --
+can be changed by
+:py:meth:`set_default_timeout()<py_openocd_client.PyOpenocdClient.set_default_timeout>`.
+
+It is also possible to specify a timeout for an individual command which then
+takes precedence over the global timeout. That is done via the ``timeout`` parameter,
+available on certain methods.
 
 .. code-block:: python
 
-    # TODO - handle timeouts
+    from py_openocd_client import PyOpenocdClient
+
+    with PyOpenocdClient(host="localhost", port=6666) as ocd:
+
+        # All commands from now on will have a timeout of 10 seconds:
+        ocd.set_default_timeout(10.0)
+
+        # ...
+
+        # Change the timeout for a single command via the "timeout" parameter:
+        ocd.cmd("load_image big_program.elf", timeout=30.0)
+
