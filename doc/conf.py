@@ -4,15 +4,13 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+from pathlib import Path
+import sys
+
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-import os
-from pathlib import Path
-import sys
+# add these directories to sys.path here.
 
 
 def get_script_dir() -> Path:
@@ -20,9 +18,9 @@ def get_script_dir() -> Path:
     return Path(__file__).resolve().parent
 
 
-src_dir = get_script_dir() / ".." / ".." / "src"
+src_dir = get_script_dir() / ".." / "src"
 src_dir = src_dir.resolve()
-assert(src_dir.is_dir())
+assert src_dir.is_dir()
 
 sys.path.insert(0, str(src_dir))
 

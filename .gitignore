@@ -69,8 +69,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
-doc/py_openocd_client/_build
+doc/_build
 
 # PyBuilder
 .pybuilder/
