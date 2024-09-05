@@ -16,3 +16,4 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/HonzaMat/PyOpenocdClient"
 Issues = "https://github.com/HonzaMat/PyOpenocdClient/issues"
+Documentation = "https://pyopenocdclient.readthedocs.io/en/latest/"
