@@ -25,13 +25,13 @@ Basic usage of PyOpenocdClient
 One instance of class :py:class:`PyOpenocdClient<py_openocd_client.PyOpenocdClient>`
 represents one TCL connection to a running OpenOCD program.
 
-PyOpenocdClient can be used in two ways:
+:py:class:`PyOpenocdClient<py_openocd_client.PyOpenocdClient>` can be used in two ways:
 
-- Manually: by making an instance of this class and calling connect() and disconnect() methods
-  establish and close the connection.
+- Manually: Make an instance of this class and call ``connect()`` and ``disconnect()`` methods
+  explicitly.
 
 - As a context manager (in ``with`` block): In this case the connection is established and closed
-  automatically when entering and leaving the context, respectively. This is the recommended approach.
+  automatically.
 
 Both these approaches are shown below.
 
@@ -40,11 +40,9 @@ Both these approaches are shown below.
     from py_openocd_client import PyOpenocdClient
 
     # Manual use of PyOpenocdClient:
-    # connect() and disconnect() needs to be manually called.
+    # connect() and disconnect() needs to be called.
 
-    ocd = PyOpenocdClient(host="some_hostname", port=1234)
-    # If host or port is not specified, the default is localhost:6666.
-
+    ocd = PyOpenocdClient(host="some_hostname", port=1234)  # default is localhost:6666
     ocd.connect()
 
     # Now interact with OpenOCD. For example:
@@ -55,14 +53,11 @@ Both these approaches are shown below.
 
     ocd.disconnect()
 
-PyOpenocdClient can be used conveniently via a context manager (Python's ``with`` block).
-Context manager handles the connect and disconnect automatically:
-
 .. code-block:: python
 
     from py_openocd_client import PyOpenocdClient
 
-    # Use of PyOpenocdClient as a context manager:
+    # Use PyOpenocdClient as a context manager:
     # The connection is established and closed automatically.
 
     with PyOpenocdClient(host="some_hostname", port=1234) as ocd:
