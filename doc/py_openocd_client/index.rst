@@ -13,10 +13,13 @@ commands can be found in `OpenOCD documentation`_.
 .. _OpenOCD: https://openocd.org
 .. _OpenOCD documentation: https://openocd.org/pages/documentation.html
 
+Homepage of PyOpenocdClient: https://github.com/HonzaMat/PyOpenocdClient
+
+
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
 
+   installing
    quickstart
    apidocs
-
