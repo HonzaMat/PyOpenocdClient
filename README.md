@@ -4,9 +4,7 @@
 
 It allows to send any TCL commands[^1] from Python programs to OpenOCD and receive results of these commands.
 
-More contents to this Readme is coming soon.
-
-Until then, please visit the **documentation on ReadTheDocs**:
+More contents to this Readme is coming soon. Until then, please visit the **documentation on ReadTheDocs**:
 
 - https://pyopenocdclient.readthedocs.io/en/latest/
 
