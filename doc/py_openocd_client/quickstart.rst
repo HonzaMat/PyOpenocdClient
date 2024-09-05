@@ -12,8 +12,8 @@ If needed, OpenOCD command `tcl port`_ can be used to change the port number
 (e.g. ``tcl port 1234``).
 
 To make OpenOCD accessible remotely from remote network machines, not just
-the localhost, use OpenOCD command `bindto`_ (e.g. ``bindto 0.0.0.0``).
-Note that the TCL connection to OpenOCD is not encrypted or authenticated, and for that
+from the localhost, use OpenOCD command `bindto`_ (e.g. ``bindto 0.0.0.0``).
+Note that the TCL connection to OpenOCD is not encrypted nor authenticated, and for that
 reason it should only be used within trusted network environments.
 
 .. _tcl port: https://openocd.org/doc/html/Server-Configuration.html#index-tcl-port
