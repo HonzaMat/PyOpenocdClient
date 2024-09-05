@@ -19,7 +19,7 @@ def run_subproc(cmd: List[str], cwd: Path) -> None:
 
 
 def main() -> int:
-    work_dir = get_script_dir() / "doc" / "py_openocd_client"
+    work_dir = get_script_dir() / "doc"
     run_subproc(
         [
             sys.executable,
