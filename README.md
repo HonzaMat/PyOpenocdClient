@@ -8,6 +8,6 @@ Until then, please visit the documentation on ReadTheDocs:
 
 - https://pyopenocdclient.readthedocs.io/en/latest/
 
-[^1]: These are commands for common debug operations like, halt execution of the program, read data from memory, read values of processor registers, place a breakpoint, ...
+[^1]: These are commands that allow to perform common debug operations, for example: halt execution of the program, read data from memory, read values of processor registers, place a breakpoint, ...
 
 
