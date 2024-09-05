@@ -43,7 +43,7 @@ class PyOpenocdClient:
         # Disconnect when done
         ocd.disconnect()
 
-    Usage through context manager:
+    Usage as a context manager:
 
     .. code-block:: python
 
