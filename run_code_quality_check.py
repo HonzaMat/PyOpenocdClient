@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # SPDX-License-Identifier: MIT
 
@@ -79,6 +79,7 @@ def main() -> int:
         get_script_dir() / "tests_integration",
     ]
     utils = [
+        get_script_dir() / "build_doc.py",
         get_script_dir() / "run_code_quality_check.py",
         get_script_dir() / "run_tests.py",
         get_script_dir() / "make_release.py",

@@ -9,21 +9,18 @@ from .types import BpInfo, BpType
 
 class _BpParser:
     """
-    Helper class to parse items from the breakpoint list, that is
-    lines produced by the "bp" command.
+    Helper internal class to parse items from the breakpoint list, that is,
+    lines produced by the OpenOCD's "bp" command.
 
-    The class serves as a helper for PyOpenocdClient class and is not intended
-    for direct use.
-
-    Note: Context and hybrid breakpoints are currently unsupported.
+    .. warning::
+        This class is not intended for direct use.
+        Its API is not guaranteed to remain stable between releases.
     """
 
     @staticmethod
     def parse_bp_entry(line: str) -> BpInfo:
         """
         Parse one item from OpenOCD's breakpoint list.
-
-        Raise ValueError if the line cannot be parsed.
         """
         parsers = [
             _BpParser._parse_bp_entry_sw,
@@ -116,7 +113,7 @@ class _BpParser:
         if "Context" in line:
             raise NotImplementedError(
                 "'Context breakpoint was found but is "
-                "unsupported by PyOpenocdClient at the moment."
+                "unsupported by this version of PyOpenocdClient."
             )
 
         # Not a context breakpoint.
@@ -128,7 +125,7 @@ class _BpParser:
         if "Hybrid" in line:
             raise NotImplementedError(
                 "Hybrid breakpoint was found but is "
-                "unsupported by PyOpenocdClient at the moment."
+                "unsupported by this version of PyOpenocdClient."
             )
 
         # Not a hybrid breakpoint.
