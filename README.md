@@ -17,7 +17,7 @@ Main features of PyOpenocdClient:
 
 * automatic integration testing against multiple version of OpenOCD;
 
-* the code is multiplatform and portable -- it does not have any dependencies except for the Python standard library;
+* the code is multiplatform and portable &mdash; it does not have any dependencies except for the Python's standard library;
 
 * fully open-source under a permissive license (MIT license).
 
