@@ -7,9 +7,9 @@ It allows to send any TCL commands from Python programs to OpenOCD and receive r
 
 Main features:
 
-* send any TCL command to OpenOCD and obtain its result;
+* allow to send any TCL command to OpenOCD and obtain its result;
 
-* shorcuts for frequently used commands;
+* shorcuts for easy use of common OpenOCD commands are provided;
 
 * command failures are detected (and are reported as Python exceptions by default);
 
@@ -20,7 +20,6 @@ Main features:
 * the code is multiplatform and portable -- no dependencies except for the Python standard library;
 
 * fully open-source under a permissive license (MIT license).
-
 
 
 ## Quick instructions
