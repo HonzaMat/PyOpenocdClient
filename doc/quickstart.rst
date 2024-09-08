@@ -108,7 +108,7 @@ PyOpenocdClient handles the outcome of the command (success or failure) this way
 Convenience methods for common commands
 ---------------------------------------
 
-For easier use, PyOpenocdClient provides convenience methods for frequently used
+For easier use, PyOpenocdClient provides convenience methods (shortcuts) for frequently used
 OpenOCD commands. These methods execute the given command and parse the command output
 (if applicable) so that the command result is returned in the form of native Python data types.
 

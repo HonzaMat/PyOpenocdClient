@@ -22,7 +22,7 @@ class PyOpenocdClient:
 
     - :meth:`cmd` method to send any TCL command to OpenOCD and obtain
       the command result,
-    - convenience methods to issue some of the most common OpenOCD commands --
+    - convenience methods (shortcuts) to issue some of the most common OpenOCD commands --
       :meth:`halt`, :meth:`resume`, :meth:`read_memory`, :meth:`get_reg`, ..., etc.
 
     Basic usage:

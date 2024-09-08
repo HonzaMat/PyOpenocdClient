@@ -5,6 +5,24 @@ software tool.
 
 It allows to send any TCL commands from Python programs to OpenOCD and receive results of these commands (for instance commands like halt execution of the program, view data in memory, place breakpoints, single-step, ...).
 
+Main features:
+
+* send any TCL command to OpenOCD and obtain its result;
+
+* shorcuts for frequently used commands;
+
+* command failures are detected (and are reported as Python exceptions by default);
+
+* the code is fully covered via unit tests;
+
+* automatic integration testing against multiple version of OpenOCD;
+
+* the code is multiplatform and portable -- no dependencies except for the Python standard library;
+
+* fully open-source under a permissive license (MIT license).
+
+
+
 ## Quick instructions
 
 Install PyOpenocdClient package using Pip:
