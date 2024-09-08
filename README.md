@@ -9,15 +9,15 @@ Main features of PyOpenocdClient:
 
 * allow to send any TCL command to OpenOCD and obtain its result;
 
-* shorcuts for easy use of most common OpenOCD commands are provided;
+* shorcuts for quick use of most common OpenOCD commands are provided;
 
-* command failures are detected (and are reported as Python exceptions by default);
+* command failures are detected (and reported as Python exceptions by default);
 
 * the code is fully covered via unit tests;
 
 * automatic integration testing against multiple version of OpenOCD;
 
-* the code is multiplatform and portable -- no dependencies except for the Python standard library;
+* the code is multiplatform and portable -- it does not have any dependencies except for the Python standard library;
 
 * fully open-source under a permissive license (MIT license).
 
