@@ -1,7 +1,7 @@
 name: Unit tests
 on: [push]
 jobs:
-  Run_unit_tests_ubuntu_22_04:
+  Run_unit_tests_ubuntu_22_04_py38_and_newer:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out the repository code
@@ -12,8 +12,6 @@ jobs:
           sudo add-apt-repository ppa:deadsnakes/ppa
           sudo apt-get update
           sudo apt-get install   \
-            python3.7            \
-            python3.7-distutils  \
             python3.8            \
             python3.8-distutils  \
             python3.9            \
@@ -25,9 +23,31 @@ jobs:
       - name: Install tox
         run: |
           python3 -m pip install --user tox
-      - name: Run unit testing (on multiple python versions, using tox)
+      - name: Run unit testing (on Python 3.8 and newer, using tox)
         run: |
           python3 -m tox
+  Run_unit_tests_ubuntu_22_04_py37:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out the repository code
+        uses: actions/checkout@v4
+      - name: Install python interpreter
+        run: |
+          sudo apt-get update
+          sudo add-apt-repository ppa:deadsnakes/ppa
+          sudo apt-get update
+          sudo apt-get install   \
+            python3.7            \
+            python3.7-distutils
+      - name: Install PIP version that still supports Python 3.7
+        run: |
+          python3 -m pip install --user pip==23.3.2
+      - name: Install tox
+        run: |
+          python3 -m pip install --user tox
+      - name: Run unit testing (on legacy Python 3.7)
+        run: |
+          python3 -m tox -e py37
 
   Run_unit_tests_windows_2022:
     runs-on: windows-2022
