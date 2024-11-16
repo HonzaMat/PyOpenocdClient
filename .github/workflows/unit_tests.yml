@@ -41,13 +41,13 @@ jobs:
             python3.7-distutils
       - name: Install PIP version that still supports Python 3.7
         run: |
-          python3 -m pip install --user pip==23.3.2
+          python3.7 -m pip install --user pip==23.3.2
       - name: Install tox
         run: |
-          python3 -m pip install --user tox
+          python3.7 -m pip install --user tox
       - name: Run unit testing (on legacy Python 3.7)
         run: |
-          python3 -m tox -e py37
+          python3.7 -m tox -e py37
 
   Run_unit_tests_windows_2022:
     runs-on: windows-2022
