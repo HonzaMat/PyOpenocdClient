@@ -100,6 +100,11 @@ def test_get_reg(ocd):
     ocd.cmd.return_value = _prepare_command_result("0xaaaa")
     assert ocd.get_reg("sp", force=True) == 0xAAAA
     ocd.cmd.assert_called_once_with("dict get [ get_reg -force sp ] sp")
+    ocd.cmd.reset_mock()
+
+    ocd.cmd.return_value = _prepare_command_result("0x1122334455667788")
+    assert ocd.get_reg("large_reg") == 0x1122334455667788
+    ocd.cmd.assert_called_once_with("dict get [ get_reg large_reg ] large_reg")
 
 
 def test_get_reg_error(ocd):
