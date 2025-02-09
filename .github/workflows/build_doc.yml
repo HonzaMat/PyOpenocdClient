@@ -1,5 +1,8 @@
 name: Build documentation
-on: [push]
+on:
+  push:
+  schedule:
+    - cron: '42 20 * * 2,4,6'
 jobs:
   build_doc:
     runs-on: ubuntu-22.04

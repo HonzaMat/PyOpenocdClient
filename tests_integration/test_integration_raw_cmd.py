@@ -51,11 +51,16 @@ def test_catch_error(openocd_process):
         assert int(out) != 0  # error code
 
 
+def test_catch_throw(openocd_process):
+    with PyOpenocdClient() as ocd:
+        out = ocd.raw_cmd('return [ catch { throw 22 "Error message" } ]')
+        assert int(out) == 22  # error code
+
+
 def test_catch_output_and_success(openocd_process):
     with PyOpenocdClient() as ocd:
-        out = ocd.raw_cmd(
-            'set RETCODE [ catch { version } OUT ]; return "$RETCODE $OUT" '
-        )
+        cmd = 'set RETCODE [ catch { version } OUT ]; return "$RETCODE $OUT" '
+        out = ocd.raw_cmd(cmd)
 
         parts = out.split(" ", maxsplit=1)
         retcode = int(parts[0])
@@ -67,9 +72,8 @@ def test_catch_output_and_success(openocd_process):
 
 def test_catch_output_and_error(openocd_process):
     with PyOpenocdClient() as ocd:
-        out = ocd.raw_cmd(
-            'set RETCODE [ catch { nonexistent_cmd } OUT; ]; return "$RETCODE $OUT" '
-        )
+        cmd = 'set RETCODE [ catch { nonexistent_cmd } OUT; ]; return "$RETCODE $OUT" '
+        out = ocd.raw_cmd(cmd)
 
         parts = out.split(" ", maxsplit=1)
         retcode = int(parts[0])
@@ -77,6 +81,19 @@ def test_catch_output_and_error(openocd_process):
 
         assert retcode != 0  # error code
         assert "invalid command" in out
+
+
+def test_catch_output_and_throw(openocd_process):
+    with PyOpenocdClient() as ocd:
+        cmd = 'set RETCODE [catch { throw 25 {my msg} } OUT;]; return "$RETCODE $OUT"'
+        out = ocd.raw_cmd(cmd)
+
+        parts = out.split(" ", maxsplit=1)
+        retcode = int(parts[0])
+        out = parts[1]
+
+        assert retcode == 25  # error code
+        assert out == "my msg"
 
 
 def test_raw_cmd_timeout_ok(openocd_process):

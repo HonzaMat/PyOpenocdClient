@@ -1,5 +1,8 @@
 name: Unit tests
-on: [push]
+on:
+  push:
+  schedule:
+    - cron: '42 20 * * 2,4,6'
 jobs:
   Run_unit_tests_ubuntu_22_04_py38_and_newer:
     runs-on: ubuntu-22.04
@@ -19,7 +22,6 @@ jobs:
             python3.11           \
             python3.11-distutils \
             python3.12           \
-            python3.12-distutils \
             python3.13
       - name: Install tox
         run: |
