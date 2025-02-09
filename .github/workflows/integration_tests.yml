@@ -1,10 +1,14 @@
 name: Integration tests
-on: [push]
+on:
+  push:
+  schedule:
+    - cron: '42 20 * * 2,4,6'
 jobs:
   integration_tests_linux:
     name: OpenOCD on Linux
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
         openocd_version:
           - vanilla-v0.10.0
@@ -15,6 +19,12 @@ jobs:
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v4
+      # Make sure libjim (Jim Tcl) is available in the system. Newer versions of OpenOCD
+      # link with it (and no longer build jimtcl from source).
+      - name: Install libjim dependency (Jim Tcl)
+        run: |
+          sudo apt-get update
+          sudo apt-get install libjim-dev
       - name: Build OpenOCD ${{ matrix.openocd_version }}
         run: |
           mkdir -p oocd-build && cd oocd-build
@@ -37,7 +47,7 @@ jobs:
 
       - name: Download OpenOCD
         run: |
-          Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.12.0-3/xpack-openocd-0.12.0-3-win32-x64.zip" -OutFile "openocd.zip"
+          Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.12.0-6/xpack-openocd-0.12.0-6-win32-x64.zip" -OutFile "openocd.zip"
 
       - name: Unzip OpenOCD
         run: |
@@ -49,6 +59,6 @@ jobs:
 
       - name: Run integration testing
         run: |
-          python3 run_tests.py integration --force-pythonpath --openocd-path xpack-openocd-0.12.0-3\\bin\\openocd
+          python3 run_tests.py integration --force-pythonpath --openocd-path xpack-openocd-0.12.0-6\\bin\\openocd
 
 

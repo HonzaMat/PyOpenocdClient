@@ -11,26 +11,11 @@ from py_openocd_client import (
 )
 
 
-def test_basic(openocd_process):
+def test_expr(openocd_process):
     with PyOpenocdClient() as ocd:
-        result = ocd.cmd("version")
+        result = ocd.cmd("expr {1 + 2 + 3}")
         assert result.retcode == 0
-        assert result.cmd == "version"
-        assert "Open On-Chip Debugger" in result.out
-
-
-def test_basic_2(openocd_process):
-
-    with PyOpenocdClient() as ocd:
-
-        if ocd.version_tuple() < (0, 12, 0):
-            # OpenOCD below version 0.12.0 seem to ignore the -code ##
-            # attribute of "return" command and always use value 2.
-            pytest.xfail("Test won't work in OpenOCD older than 0.12.0")
-
-        result = ocd.cmd("return -level 0 -code ok xyz")
-        assert result.retcode == 0
-        assert result.out == "xyz"
+        assert result.out == "6"
 
 
 def test_echo(openocd_process):
@@ -59,36 +44,27 @@ def test_failed_cmd(openocd_process):
 
 def test_failed_cmd_2(openocd_process):
     with PyOpenocdClient() as ocd:
-
-        if ocd.version_tuple() < (0, 12, 0):
-            # OpenOCD below version 0.12.0 seem to ignore the -code ##
-            # attribute of "return" command and always use value 2.
-            expected_retcode = 2
-        else:
-            expected_retcode = 77
-
         with pytest.raises(OcdCommandFailedError) as e:
-            ocd.cmd("return -level 0 -code 77 {some text}")
+            # Note:
+            # Command `throw <err_code> <message>` is used here as it works reliably
+            # across multiple jimtcl versions.
+            #
+            # The command `return -level 0 -code <err_code> <message>` is not used
+            # because older versions of jimtcl seem to have problems with `-code`:
+            # they would always return 2 and ignore the <err_code>.
+            ocd.cmd("throw 77 {some error message}")
 
-        assert e.value.result.retcode == expected_retcode
-        assert e.value.result.out == "some text"
+        assert e.value.result.retcode == 77
+        assert e.value.result.out == "some error message"
 
 
 def test_failed_cmd_negative_retcode(openocd_process):
     with PyOpenocdClient() as ocd:
-
-        if ocd.version_tuple() < (0, 12, 0):
-            # OpenOCD below version 0.12.0 seem to ignore the -code ##
-            # attribute of "return" command and always use value 2.
-            expected_retcode = 2
-        else:
-            expected_retcode = -200
-
         with pytest.raises(OcdCommandFailedError) as e:
-            ocd.cmd("return -level 0 -code -200 {some text}")
+            ocd.cmd("throw -200 {some error text}")
 
-        assert e.value.result.retcode == expected_retcode
-        assert e.value.result.out == "some text"
+        assert e.value.result.retcode == -200
+        assert e.value.result.out == "some error text"
 
 
 def test_failed_cmd_dont_throw(openocd_process):
@@ -99,11 +75,19 @@ def test_failed_cmd_dont_throw(openocd_process):
         assert "invalid command" in result.out
 
 
-def test_set_and_read_variable(openocd_process):
+def test_set_and_read_variable_using_echo(openocd_process):
     with PyOpenocdClient() as ocd:
         ocd.cmd("set MY_VARIALBLE 123456")
         result = ocd.cmd("echo $MY_VARIALBLE", capture=True)
         assert result.out == "123456"
+
+
+def test_version_manual(openocd_process):
+    with PyOpenocdClient() as ocd:
+        result = ocd.cmd("version")
+        assert result.retcode == 0
+        assert result.cmd == "version"
+        assert "Open On-Chip Debugger" in result.out
 
 
 def test_version(openocd_process):
@@ -115,6 +99,7 @@ def test_version_tuple(openocd_process):
     with PyOpenocdClient() as ocd:
         major, minor, patch = ocd.version_tuple()
         assert (major, minor, patch) >= (0, 10, 0)
+        # Older versions of OpenOCD than 0.10.0 are not tested.
 
 
 def test_timeout_ok(openocd_process):
