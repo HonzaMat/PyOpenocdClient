@@ -298,8 +298,8 @@ class PyOpenocdClient:
 
     def curstate(self) -> str:
         """
-        Determinte the state of the currently selected target via the `currstate`
-        command. Return the state as a string.
+        Determinte the state of the currently selected target via
+        the ``<target_name> curstate`` command. Return the state as a string.
         """
         return self.cmd("[target current] curstate").out.strip()
 
