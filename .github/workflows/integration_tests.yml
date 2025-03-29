@@ -11,15 +11,14 @@ jobs:
       fail-fast: false
       matrix:
         openocd_version:
-          # Released versions of OpenOCD:
-          - vanilla-v0.10.0
-          - vanilla-v0.11.0
-          - vanilla-v0.12.0
-          # Development versions of OpenOCD (with different Jim Tcl interpreter versions):
-          - vanilla-master-default-libjim
+          - vanilla-0.10.0
+          - vanilla-0.11.0
+          - vanilla-0.12.0
+          - vanilla-master-libjim-from-apt
+          - vanilla-master-libjim-internal
+          - vanilla-master-libjim-0.79
           - vanilla-master-libjim-0.83
-          - riscv-master-default-libjim
-          - riscv-master-libjim-0.83
+          - riscv-master-libjim-from-apt
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v4
@@ -34,7 +33,9 @@ jobs:
 
       - name: Run integration test
         run: |
-          python3 run_tests.py integration --force-pythonpath --openocd-path oocd-build/install/${{ matrix.openocd_version }}/openocd/bin/openocd
+          python3 run_tests.py integration \
+              --force-pythonpath \
+              --openocd-path oocd-build/install/${{ matrix.openocd_version }}/openocd/bin/openocd
 
   integration_test_windows:
     name: OpenOCD on Windows
