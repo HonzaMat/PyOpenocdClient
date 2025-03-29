@@ -1,13 +1,12 @@
 #!/usr/bin/python3
 
 import argparse
-from dataclasses import dataclass
-from enum import Enum
 import multiprocessing
 import os
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 
 REPO_OPENOCD_VANILLA = "https://github.com/openocd-org/openocd.git"
@@ -20,11 +19,24 @@ LIBJIM_CONFIGURE_ARGS = ["--with-ext=json", "--disable-ssl"]
 NPROC = min(multiprocessing.cpu_count(), 8)
 
 
-class LibJimVersion(Enum):
-    FROM_APT = "apt"
-    INTERNAL = "internal"  # From submodule in OpenOCD repo
-    FROM_SOURCE_0_79 = "0.79"  # Used in Debian 11
-    FROM_SOURCE_0_83 = "0.83"
+@dataclass
+class LibJimVersion:
+    git_rev: str | None = None
+    extra_configure_args: list[str] = field(default_factory=lambda: [])
+
+
+LIBJIM_FROM_APT = LibJimVersion()
+LIBJIM_INTERNAL = LibJimVersion()
+LIBJIM_FROM_SOURCE_0_79 = LibJimVersion(
+    # JimTcl version used in Debian 11
+    git_rev="0.79",
+    extra_configure_args=["--with-ext=json", "--disable-ssl"],
+)
+LIBJIM_FROM_SOURCE_0_83 = LibJimVersion(
+    # Latest JimTcl release as of March 2025
+    git_rev="0.83",
+    extra_configure_args=["--with-ext=json", "--disable-ssl", "--minimal"],
+)
 
 
 @dataclass
@@ -48,7 +60,7 @@ OPENOCD_VERSIONS = [
         # Older OpenOCD code has compilation warnings on new GCC
         extra_cflags="-Wno-error",
         extra_configure_args=[],
-        libjim=LibJimVersion.INTERNAL,
+        libjim=LIBJIM_INTERNAL,
     ),
     OpenOcdVersion(
         name="vanilla-0.11.0",
@@ -57,7 +69,7 @@ OPENOCD_VERSIONS = [
         # Older OpenOCD code has compilation warnings on new GCC
         extra_cflags="-Wno-error",
         extra_configure_args=[],
-        libjim=LibJimVersion.INTERNAL,
+        libjim=LIBJIM_INTERNAL,
     ),
     OpenOcdVersion(
         name="vanilla-0.12.0",
@@ -65,7 +77,7 @@ OPENOCD_VERSIONS = [
         git_rev="v0.12.0",
         extra_cflags="",
         extra_configure_args=[],
-        libjim=LibJimVersion.INTERNAL,
+        libjim=LIBJIM_INTERNAL,
     ),
     OpenOcdVersion(
         name="vanilla-master-libjim-from-apt",
@@ -73,7 +85,7 @@ OPENOCD_VERSIONS = [
         git_rev="master",
         extra_cflags="",
         extra_configure_args=[],
-        libjim=LibJimVersion.FROM_APT,
+        libjim=LIBJIM_FROM_APT,
     ),
     OpenOcdVersion(
         name="vanilla-master-libjim-internal",
@@ -81,7 +93,7 @@ OPENOCD_VERSIONS = [
         git_rev="master",
         extra_cflags="",
         extra_configure_args=["--enable-internal-jimtcl"],
-        libjim=LibJimVersion.INTERNAL,
+        libjim=LIBJIM_INTERNAL,
     ),
     OpenOcdVersion(
         name="vanilla-master-libjim-0.79",
@@ -89,7 +101,7 @@ OPENOCD_VERSIONS = [
         git_rev="master",
         extra_cflags="",
         extra_configure_args=[],
-        libjim=LibJimVersion.FROM_SOURCE_0_79,
+        libjim=LIBJIM_FROM_SOURCE_0_79,
     ),
     OpenOcdVersion(
         name="vanilla-master-libjim-0.83",
@@ -97,7 +109,7 @@ OPENOCD_VERSIONS = [
         git_rev="master",
         extra_cflags="",
         extra_configure_args=[],
-        libjim=LibJimVersion.FROM_SOURCE_0_83,
+        libjim=LIBJIM_FROM_SOURCE_0_83,
     ),
     OpenOcdVersion(
         name="riscv-master-libjim-from-apt",
@@ -105,7 +117,7 @@ OPENOCD_VERSIONS = [
         git_rev="riscv",
         extra_cflags="",
         extra_configure_args=[],
-        libjim=LibJimVersion.FROM_APT,
+        libjim=LIBJIM_FROM_APT,
     ),
 ]
 
@@ -144,43 +156,44 @@ def parse_args() -> OpenOcdVersion:
     return next(v for v in OPENOCD_VERSIONS if v.name == args.version_name)
 
 
-def recreate_dir(d: Path):
+def recreate_dir(d: Path) -> None:
     if d.exists():
         shutil.rmtree(d)
     os.makedirs(d)
 
 
-def run_cmd(cmd: list[str], cwd: str | None = None, env=None) -> None:
+def run_cmd(
+    cmd: list[str], cwd: Path | None = None, env: dict[str, str] | None = None
+) -> None:
     print(f"Running command: {repr(cmd)} (work dir: {cwd})")
     subprocess.check_call(cmd, cwd=cwd, env=env)
 
 
 def git_show_current_commit(cwd: Path) -> None:
     assert cwd.is_dir()
-    run_cmd(
-        ["git", "--no-pager", "show", "--no-patch"], cwd=cwd
-    )
+    run_cmd(["git", "--no-pager", "show", "--no-patch"], cwd=cwd)
 
 
-def prepare_libjim(libjim_version: LibJimVersion) -> None:
-    if libjim_version == LibJimVersion.INTERNAL:
+def prepare_libjim(version: OpenOcdVersion) -> None:
+    if version.libjim == LIBJIM_INTERNAL:
         # Do not install anything
         pass
-    elif libjim_version == LibJimVersion.FROM_APT:
+    elif version.libjim == LIBJIM_FROM_APT:
         run_cmd(["sudo", "apt-get", "install", "-y", "libjim-dev"])
     else:
-        checkout_and_build_libjim(libjim_version)
+        checkout_and_build_libjim(version)
 
 
-def checkout_and_build_libjim(libjim_version: LibJimVersion) -> None:
-    assert libjim_version not in [LibJimVersion.INTERNAL, LibJimVersion.FROM_APT]
+def checkout_and_build_libjim(version: OpenOcdVersion) -> None:
+    assert version.libjim not in [LIBJIM_INTERNAL, LIBJIM_FROM_APT]
 
-    libjim_rev = libjim_version.value
-
-    src_dir = get_src_dir(libjim_rev, "libjim")
-    install_dir = get_install_dir(libjim_rev, "libjim")
+    src_dir = get_src_dir(version.name, "libjim")
+    install_dir = get_install_dir(version.name, "libjim")
     recreate_dir(src_dir)
     recreate_dir(install_dir)
+
+    libjim_rev = version.libjim.git_rev
+    assert libjim_rev is not None
 
     run_cmd(["git", "clone", REPO_LIBJIM, "."], cwd=src_dir)
     run_cmd(["git", "checkout", libjim_rev], cwd=src_dir)
@@ -190,7 +203,7 @@ def checkout_and_build_libjim(libjim_version: LibJimVersion) -> None:
         "/bin/sh",
         "./configure",
         "--prefix=" + str(install_dir),
-    ] + LIBJIM_CONFIGURE_ARGS
+    ] + version.libjim.extra_configure_args
     run_cmd(configure_cmd, cwd=src_dir)
 
     run_cmd(["make", f"-j{NPROC}"], cwd=src_dir)
@@ -210,7 +223,7 @@ def checkout_and_build_openocd(version: OpenOcdVersion) -> None:
     run_cmd(["git", "checkout", version.git_rev], cwd=src_dir)
     git_show_current_commit(cwd=src_dir)
 
-    if version.libjim == LibJimVersion.INTERNAL:
+    if version.libjim == LIBJIM_INTERNAL:
         # Need to checkout the jimtcl submodule
         run_cmd(["git", "submodule", "update", "--init", "--recursive"], cwd=src_dir)
 
@@ -236,7 +249,7 @@ def check_build(version: OpenOcdVersion) -> None:
             f"The expected binary does not exist after the build: {str(openocd_bin)}"
         )
 
-    run_cmd([openocd_bin, "--version"])
+    run_cmd([str(openocd_bin), "--version"])
 
     print()
     print(f'OpenOCD "{version.name}" successfully built!')
@@ -246,7 +259,7 @@ def check_build(version: OpenOcdVersion) -> None:
 def main() -> int:
     openocd_version = parse_args()
 
-    prepare_libjim(openocd_version.libjim)
+    prepare_libjim(openocd_version)
     checkout_and_build_openocd(openocd_version)
     check_build(openocd_version)
 
