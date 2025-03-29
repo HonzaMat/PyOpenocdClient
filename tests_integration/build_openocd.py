@@ -21,12 +21,14 @@ NPROC = min(multiprocessing.cpu_count(), 8)
 
 @dataclass
 class LibJimVersion:
+    is_internal: bool = False
+    is_from_apt: bool = False
     git_rev: str | None = None
     extra_configure_args: list[str] = field(default_factory=lambda: [])
 
 
-LIBJIM_FROM_APT = LibJimVersion()
-LIBJIM_INTERNAL = LibJimVersion()
+LIBJIM_FROM_APT = LibJimVersion(is_from_apt=True)
+LIBJIM_INTERNAL = LibJimVersion(is_internal=True)
 LIBJIM_FROM_SOURCE_0_79 = LibJimVersion(
     # JimTcl version used in Debian 11
     git_rev="0.79",
