@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 
+import socket
 import subprocess
 import time
 from pathlib import Path
@@ -18,9 +19,36 @@ def pytest_addoption(parser):
     )
 
 
+def _wait_until_port_open(port: int, timeout: float = 5.0):
+    """Wait until OpenOCD opens given TCP port."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(0.1)
+
+    time_start = time.time()
+    while True:
+        try:
+            s.connect(("127.0.0.1", port))
+        except socket.error as e:
+            print(str(e))
+            time_elapsed = time.time() - time_start
+            if time_elapsed > timeout:
+                raise RuntimeError(
+                    "It looks like OpenOCD did not start up (did not open "
+                    f"port {port}) within {timeout} sec"
+                )
+            time.sleep(0.1)
+            continue
+        finally:
+            s.close()
+            return
+
+
 @pytest.fixture
 def openocd_path(pytestconfig):
     return Path(pytestconfig.getoption("openocd_path")).resolve()
+
+
+TCL_PORT_NUM = 6666
 
 
 @pytest.fixture
@@ -49,14 +77,22 @@ def has_buggy_whitespace_trim(openocd_version):
 
 @pytest.fixture
 def openocd_process(openocd_path):
-    # Start OpenOCD without any target, just so that TCL command interface
-    # becomes available.
-    proc = subprocess.Popen([openocd_path, "-c", "noinit", "-c", "tcl_port 6666"])
-    # Safety: Give OpenOCD time to start up, avoid races
-    time.sleep(1.0)
+    proc = subprocess.Popen([openocd_path, "-c", "noinit", "-c", f"tcl_port {TCL_PORT_NUM}"])
 
-    yield proc
+    try:
+        # Start OpenOCD without any target, just so that TCL command interface
+        # becomes available.
+        _wait_until_port_open(TCL_PORT_NUM)
 
-    # Kill if still running
-    if proc.poll() is None:
-        proc.kill()
+        yield proc
+
+    finally:
+
+        # Kill if still running
+        if proc.poll() is None:
+            proc.kill()
+
+        # Safety
+        proc.wait(timeout=1.0)
+        assert proc.poll() is not None
+        time.sleep(0.2)  # just in case
