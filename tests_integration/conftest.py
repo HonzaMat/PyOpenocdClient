@@ -77,7 +77,9 @@ def has_buggy_whitespace_trim(openocd_version):
 
 @pytest.fixture
 def openocd_process(openocd_path):
-    proc = subprocess.Popen([openocd_path, "-c", "noinit", "-c", f"tcl_port {TCL_PORT_NUM}"])
+    proc = subprocess.Popen(
+        [openocd_path, "-c", "noinit", "-c", f"tcl_port {TCL_PORT_NUM}"]
+    )
 
     try:
         # Start OpenOCD without any target, just so that TCL command interface
