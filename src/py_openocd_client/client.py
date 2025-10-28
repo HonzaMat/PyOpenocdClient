@@ -666,11 +666,24 @@ class PyOpenocdClient:
     def shutdown(self) -> None:
         """
         Shut down the OpenOCD process by sending the ``shutdown`` command to it.
-        Then terminate the connection.
+        PyOpenocd client also gets immediately disconnected from OpenOCD.
         """
-        # OpenOCD's shutdown command returns a non-zero error code (which is expected).
-        # For that reason, throw=False is used.
-        self.cmd("shutdown", throw=False)
+        # Different OpenOCD versions respond to "shutdown" command differently:
+        #
+        # - OpenOCD 0.12.0 and older:
+        #   The "shutdown" command results in a non-zero TCL return code,
+        #   which can be obtained normally as for any other TCL command -
+        #   e.g. via the "catch" command.
+        #
+        # - OpenOCD 0.13.0-dev and newer (from to commit "93f16eed4"):
+        #   The "shutdown" command immediately ends the TCL processing and
+        #   an empty response is sent back to the TCL client.
+
+        # For the above reasons, send the shutdown command via raw_cmd() and:
+        # - don't wrap "shutdown" into any other TCL commands,
+        # - don't expect any particular response.
+        self.raw_cmd("shutdown", throw=False)
+
         self.disconnect()
 
     def raw_cmd(self, raw_cmd: str, timeout: Optional[float] = None) -> str:
