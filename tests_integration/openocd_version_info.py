@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: MIT
 
 from dataclasses import dataclass, field
+from typing import Optional
+
 
 REPO_OPENOCD_VANILLA = "https://github.com/openocd-org/openocd.git"
 REPO_OPENOCD_RISCV = "https://github.com/riscv-collab/riscv-openocd.git"
@@ -14,8 +16,8 @@ REPO_LIBJIM = "https://github.com/msteveb/jimtcl.git"
 class LibJimVersion:
     is_internal: bool = False
     is_from_apt: bool = False
-    repo: str | None = None
-    git_rev: str | None = None
+    repo: Optional[str] = None
+    git_rev: Optional[str] = None
     extra_configure_args: list[str] = field(default_factory=lambda: [])
 
 
