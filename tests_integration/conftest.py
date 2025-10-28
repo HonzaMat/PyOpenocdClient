@@ -19,28 +19,47 @@ def pytest_addoption(parser):
     )
 
 
-def _wait_until_port_open(port: int, timeout: float = 5.0):
-    """Wait until OpenOCD opens given TCP port."""
+def _is_tcp_port_open(port):
+    """Check if the given TCP port is open on the localhost"""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(0.1)
+    try:
+        s.connect(("127.0.0.1", port))
+    except socket.error as e:
+        return False
+    else:
+        s.close()
+        return True
 
+
+def _wait_until(predicate, timeout):
     time_start = time.time()
     while True:
-        try:
-            s.connect(("127.0.0.1", port))
-        except socket.error as e:
-            print(str(e))
-            time_elapsed = time.time() - time_start
-            if time_elapsed > timeout:
-                raise RuntimeError(
-                    "It looks like OpenOCD did not start up (did not open "
-                    f"port {port}) within {timeout} sec"
-                )
-            time.sleep(0.1)
-            continue
-        finally:
-            s.close()
+        if predicate():
+            # success
             return
+        time_elapsed = time.time() - time_start
+        if time_elapsed > timeout:
+            raise TimeoutError()
+
+
+def _wait_until_tcp_port_open(port: int, timeout: float = 5.0):
+    try:
+        _wait_until(lambda: _is_tcp_port_open(port), timeout)
+    except TimeoutError:
+        raise TimeoutError(
+            f"It looks like OpenOCD did not open its port {port} within {timeout} sec"
+        )
+
+
+def _wait_until_tcp_port_closed(port: int, timeout: float = 5.0):
+    try:
+        _wait_until(lambda: not _is_tcp_port_open(port), timeout)
+    except TimeoutError:
+        raise TimeoutError(
+            "It looks like OpenOCD did not shut down correctly - "
+            f"the port {port} is not closed within {timeout} sec"
+        )
 
 
 @pytest.fixture
@@ -77,24 +96,24 @@ def has_buggy_whitespace_trim(openocd_version):
 
 @pytest.fixture
 def openocd_process(openocd_path):
-    proc = subprocess.Popen(
-        [openocd_path, "-c", "noinit", "-c", f"tcl_port {TCL_PORT_NUM}"]
-    )
+
+    # Start OpenOCD without any target, just so that TCL command interface
+    # becomes available.
+    cmd = [openocd_path, "-c", "noinit", "-c", f"tcl_port {TCL_PORT_NUM}"]
+    proc = subprocess.Popen(cmd)
 
     try:
-        # Start OpenOCD without any target, just so that TCL command interface
-        # becomes available.
-        _wait_until_port_open(TCL_PORT_NUM)
-
+        _wait_until_tcp_port_open(TCL_PORT_NUM)
         yield proc
 
     finally:
-
         # Kill if still running
         if proc.poll() is None:
             proc.kill()
 
         # Safety
+        _wait_until_tcp_port_closed(TCL_PORT_NUM)
+
+        # Safety
         proc.wait(timeout=1.0)
         assert proc.poll() is not None
-        time.sleep(0.2)  # just in case
