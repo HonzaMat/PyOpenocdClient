@@ -682,7 +682,7 @@ class PyOpenocdClient:
         # For the above reasons, send the shutdown command via raw_cmd() and:
         # - don't wrap "shutdown" into any other TCL commands,
         # - don't expect any particular response.
-        self.raw_cmd("shutdown", throw=False)
+        self.raw_cmd("shutdown")
 
         self.disconnect()
 
