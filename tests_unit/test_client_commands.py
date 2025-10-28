@@ -451,6 +451,8 @@ def test_exit(ocd):
 
 def test_shutdown(ocd):
     ocd.disconnect = mock.Mock()
+    ocd.raw_cmd = mock.Mock()
     ocd.shutdown()
-    ocd.cmd.assert_called_once_with("shutdown", throw=False)
+    assert not ocd.cmd.called
+    ocd.raw_cmd.assert_called_once_with("shutdown")
     ocd.disconnect.assert_called_once()
