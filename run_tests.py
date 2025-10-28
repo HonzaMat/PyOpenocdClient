@@ -57,7 +57,9 @@ def run_unittests(enable_coverage: bool) -> None:
     run_subproc(cmd)
 
 
-def run_integration_tests(openocd_path: Path, openocd_version: str, enable_coverage: bool) -> None:
+def run_integration_tests(
+    openocd_path: Path, openocd_version: str, enable_coverage: bool
+) -> None:
     pytest_args = [
         "-m",
         "pytest",

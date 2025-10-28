@@ -3,14 +3,19 @@
 import subprocess
 import time
 from pathlib import Path
-from openocd_version_info import OPENOCD_VERSION_NAMES
 
 import pytest
+from openocd_version_info import OPENOCD_VERSION_NAMES
 
 
 def pytest_addoption(parser):
     parser.addoption("--openocd-path", action="store", required=True)
-    parser.addoption("--openocd-version", action="store", required=True, choices=OPENOCD_VERSION_NAMES)
+    parser.addoption(
+        "--openocd-version",
+        action="store",
+        required=True,
+        choices=OPENOCD_VERSION_NAMES,
+    )
 
 
 @pytest.fixture

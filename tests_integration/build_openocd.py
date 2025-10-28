@@ -9,7 +9,14 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from openocd_version_info import OPENOCD_VERSIONS, OPENOCD_VERSION_NAMES, OpenOcdVersion, LIBJIM_FROM_APT, LIBJIM_INTERNAL
+
+from openocd_version_info import (
+    LIBJIM_FROM_APT,
+    LIBJIM_INTERNAL,
+    OPENOCD_VERSION_NAMES,
+    OPENOCD_VERSIONS,
+    OpenOcdVersion,
+)
 
 # Build parallelism. (The upper limit is for safety.)
 NPROC = min(multiprocessing.cpu_count(), 8)
@@ -42,7 +49,7 @@ def parse_args() -> OpenOcdVersion:
         "--openocd-version",
         choices=OPENOCD_VERSION_NAMES,
         required=True,
-        help="OpenOCD version to build"
+        help="OpenOCD version to build",
     )
     args = parser.parse_args()
 

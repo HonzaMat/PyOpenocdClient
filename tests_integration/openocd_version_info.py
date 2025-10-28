@@ -5,7 +5,6 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
-
 REPO_OPENOCD_VANILLA = "https://github.com/openocd-org/openocd.git"
 REPO_OPENOCD_RISCV = "https://github.com/riscv-collab/riscv-openocd.git"
 

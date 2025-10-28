@@ -71,8 +71,6 @@ def test_catch_throw(openocd_process):
 def _parse_out(out):
     # "5 some text" -> (5, "some text")
     parts = out.split(" ", maxsplit=1)
-    retcode = int(parts[0])
-    out = parts[1]
     return int(parts[0]), parts[1]
 
 
@@ -86,9 +84,14 @@ def test_catch_output_and_success(openocd_process):
         assert "Open On-Chip Debugger" in text
 
 
-def test_catch_output_and_success_whitespace(openocd_process, has_buggy_whitespace_trim):
+def test_catch_output_and_success_whitespace(
+    openocd_process, has_buggy_whitespace_trim
+):
     with PyOpenocdClient() as ocd:
-        cmd = 'set RETCODE [ catch { string repeat { a } 4 } OUT ]; return "$RETCODE $OUT" '
+        cmd = (
+            "set RETCODE [catch { string repeat { a } 4 } OUT]; "
+            'return "$RETCODE $OUT"'
+        )
         out = ocd.raw_cmd(cmd)
         retcode, text = _parse_out(out)
 
@@ -123,7 +126,9 @@ def test_catch_output_and_throw(openocd_process):
 
 def test_catch_output_and_throw_whitespace(openocd_process, has_buggy_whitespace_trim):
     with PyOpenocdClient() as ocd:
-        cmd = 'set RETCODE [catch { throw 25 { my msg  } } OUT;]; return "$RETCODE $OUT"'
+        cmd = (
+            'set RETCODE [catch { throw 25 { my msg  } } OUT;]; return "$RETCODE $OUT"'
+        )
         out = ocd.raw_cmd(cmd)
         retcode, text = _parse_out(out)
 
