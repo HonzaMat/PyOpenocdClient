@@ -35,6 +35,9 @@ def parse_args() -> argparse.Namespace:
         "--openocd-path", help="Path to OpenOCD executable", default=None
     )
     parser.add_argument(
+        "--openocd-version", help="OpenOCD version being tested", default=None
+    )
+    parser.add_argument(
         "test_type", choices=["unit", "integration"], help="Type of the tests"
     )
     return parser.parse_args()
@@ -54,7 +57,9 @@ def run_unittests(enable_coverage: bool) -> None:
     run_subproc(cmd)
 
 
-def run_integration_tests(openocd_path: Path, enable_coverage: bool) -> None:
+def run_integration_tests(
+    openocd_path: Path, openocd_version: str, enable_coverage: bool
+) -> None:
     pytest_args = [
         "-m",
         "pytest",
@@ -62,6 +67,8 @@ def run_integration_tests(openocd_path: Path, enable_coverage: bool) -> None:
         "-vv",
         "--openocd-path",
         str(openocd_path),
+        "--openocd-version",
+        str(openocd_version),
     ]
     if enable_coverage:
         cmd = [sys.executable, "-m", "coverage", "run"] + pytest_args
@@ -100,13 +107,17 @@ def main() -> int:
     if args.test_type == "unit":
         if args.openocd_path:
             raise RuntimeError("--openocd-path is irrelevant for unittests")
+        if args.openocd_version:
+            raise RuntimeError("--openocd-version is irrelevant for unittests")
         run_unittests(args.coverage)
 
     elif args.test_type == "integration":
         if not args.openocd_path:
             raise RuntimeError("--openocd-path is required for integration tests")
+        if not args.openocd_version:
+            raise RuntimeError("--openocd-version is required for integration tests")
         openocd_path = Path(args.openocd_path).resolve()
-        run_integration_tests(openocd_path, args.coverage)
+        run_integration_tests(openocd_path, args.openocd_version, args.coverage)
 
     else:
         assert False
