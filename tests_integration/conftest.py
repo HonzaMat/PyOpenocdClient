@@ -34,7 +34,12 @@ def has_buggy_whitespace_trim(openocd_version):
     whitespace trimming on the command output. This was fixed in commit "93f16eed4,
     https://review.openocd.org/c/openocd/+/9084.
     """
-    return openocd_version in ["vanilla-0.10.0", "vanilla-0.11.0", "vanilla-0.12.0"]
+    return openocd_version in [
+        "vanilla-0.10.0",
+        "vanilla-0.11.0",
+        "vanilla-0.12.0",
+        "riscv-master-libjim-from-apt",
+    ]
 
 
 @pytest.fixture
