@@ -25,11 +25,17 @@ def test_echo(openocd_process):
         assert result.out == ""  # because capture was not set
 
 
-def test_echo_with_capture(openocd_process):
+def test_echo_with_capture(openocd_process, has_buggy_whitespace_trim):
     with PyOpenocdClient() as ocd:
         result = ocd.cmd("echo {some text}", capture=True)
         assert result.retcode == 0
-        assert result.out == "some text"
+
+        # "echo" appends \n at the end
+        if has_buggy_whitespace_trim:
+            assert result.out == "some text"
+            pytest.xfail("known OpenOCD whitespace bug")
+        else:
+            assert result.out == "some text\n"
 
 
 def test_failed_cmd(openocd_process):
@@ -75,11 +81,32 @@ def test_failed_cmd_dont_throw(openocd_process):
         assert "invalid command" in result.out
 
 
-def test_set_and_read_variable_using_echo(openocd_process):
+def test_assign_variable_and_read_by_echo(openocd_process, has_buggy_whitespace_trim):
     with PyOpenocdClient() as ocd:
         ocd.cmd("set MY_VARIALBLE 123456")
         result = ocd.cmd("echo $MY_VARIALBLE", capture=True)
+
+        if has_buggy_whitespace_trim:
+            assert result.out == "123456"
+            pytest.xfail("known OpenOCD whitespace bug")
+        else:
+            assert result.out == "123456\n"
+
+
+def test_assign_variable_and_read_by_set(openocd_process):
+    with PyOpenocdClient() as ocd:
+        ocd.cmd("set MY_VARIALBLE 123456")
+        # Tcl "set" without just one parameter displays the variable value.
+        result = ocd.cmd("set MY_VARIALBLE")
         assert result.out == "123456"
+
+
+def test_read_nonexistent_variable(openocd_process):
+    with PyOpenocdClient() as ocd:
+        with pytest.raises(OcdCommandFailedError) as e:
+            ocd.cmd("set NONEXISTENT_VAR")
+        assert e.value.result.retcode != 0
+        assert "no such variable" in e.value.result.out
 
 
 def test_version_manual(openocd_process):
@@ -99,7 +126,7 @@ def test_version_tuple(openocd_process):
     with PyOpenocdClient() as ocd:
         major, minor, patch = ocd.version_tuple()
         assert (major, minor, patch) >= (0, 10, 0)
-        # Older versions of OpenOCD than 0.10.0 are not tested.
+        # Older OpenOCD versions than 0.10.0 are not tested.
 
 
 def test_timeout_ok(openocd_process):

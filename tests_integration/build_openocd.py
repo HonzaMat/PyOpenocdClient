@@ -1,129 +1,18 @@
 #!/usr/bin/python3
 
+# SPDX-License-Identifier: MIT
+
 import argparse
 import multiprocessing
 import os
 import shutil
 import subprocess
 import sys
-from dataclasses import dataclass, field
 from pathlib import Path
-
-REPO_OPENOCD_VANILLA = "https://github.com/openocd-org/openocd.git"
-REPO_OPENOCD_RISCV = "https://github.com/riscv-collab/riscv-openocd.git"
-
-REPO_LIBJIM = "https://github.com/msteveb/jimtcl.git"
-LIBJIM_CONFIGURE_ARGS = ["--with-ext=json", "--disable-ssl"]
+from openocd_version_info import OPENOCD_VERSIONS, OPENOCD_VERSION_NAMES, OpenOcdVersion, LIBJIM_FROM_APT, LIBJIM_INTERNAL
 
 # Build parallelism. (The upper limit is for safety.)
 NPROC = min(multiprocessing.cpu_count(), 8)
-
-
-@dataclass
-class LibJimVersion:
-    is_internal: bool = False
-    is_from_apt: bool = False
-    git_rev: str | None = None
-    extra_configure_args: list[str] = field(default_factory=lambda: [])
-
-
-LIBJIM_FROM_APT = LibJimVersion(is_from_apt=True)
-LIBJIM_INTERNAL = LibJimVersion(is_internal=True)
-LIBJIM_FROM_SOURCE_0_79 = LibJimVersion(
-    # JimTcl version used in Debian 11
-    git_rev="0.79",
-    extra_configure_args=["--with-ext=json", "--disable-ssl"],
-)
-LIBJIM_FROM_SOURCE_0_83 = LibJimVersion(
-    # Latest JimTcl release as of March 2025
-    git_rev="0.83",
-    extra_configure_args=["--with-ext=json", "--disable-ssl", "--minimal"],
-)
-
-
-@dataclass
-class OpenOcdVersion:
-    name: str
-    repo: str
-    git_rev: str
-    extra_cflags: str
-    extra_configure_args: list[str]
-    libjim: LibJimVersion
-
-
-# Various combinations of:
-# - OpenOCD version
-# - JimTcl version
-OPENOCD_VERSIONS = [
-    OpenOcdVersion(
-        name="vanilla-0.10.0",
-        repo=REPO_OPENOCD_VANILLA,
-        git_rev="v0.10.0",
-        # Older OpenOCD code has compilation warnings on new GCC
-        extra_cflags="-Wno-error",
-        extra_configure_args=[],
-        libjim=LIBJIM_INTERNAL,
-    ),
-    OpenOcdVersion(
-        name="vanilla-0.11.0",
-        repo=REPO_OPENOCD_VANILLA,
-        git_rev="v0.11.0",
-        # Older OpenOCD code has compilation warnings on new GCC
-        extra_cflags="-Wno-error",
-        extra_configure_args=[],
-        libjim=LIBJIM_INTERNAL,
-    ),
-    OpenOcdVersion(
-        name="vanilla-0.12.0",
-        repo=REPO_OPENOCD_VANILLA,
-        git_rev="v0.12.0",
-        extra_cflags="",
-        extra_configure_args=[],
-        libjim=LIBJIM_INTERNAL,
-    ),
-    OpenOcdVersion(
-        name="vanilla-master-libjim-from-apt",
-        repo=REPO_OPENOCD_VANILLA,
-        git_rev="master",
-        extra_cflags="",
-        extra_configure_args=[],
-        libjim=LIBJIM_FROM_APT,
-    ),
-    OpenOcdVersion(
-        name="vanilla-master-libjim-internal",
-        repo=REPO_OPENOCD_VANILLA,
-        git_rev="master",
-        extra_cflags="",
-        extra_configure_args=["--enable-internal-jimtcl"],
-        libjim=LIBJIM_INTERNAL,
-    ),
-    OpenOcdVersion(
-        name="vanilla-master-libjim-0.79",
-        repo=REPO_OPENOCD_VANILLA,
-        git_rev="master",
-        extra_cflags="",
-        extra_configure_args=[],
-        libjim=LIBJIM_FROM_SOURCE_0_79,
-    ),
-    OpenOcdVersion(
-        name="vanilla-master-libjim-0.83",
-        repo=REPO_OPENOCD_VANILLA,
-        git_rev="master",
-        extra_cflags="",
-        extra_configure_args=[],
-        libjim=LIBJIM_FROM_SOURCE_0_83,
-    ),
-    OpenOcdVersion(
-        name="riscv-master-libjim-from-apt",
-        repo=REPO_OPENOCD_RISCV,
-        git_rev="riscv",
-        extra_cflags="",
-        extra_configure_args=[],
-        libjim=LIBJIM_FROM_APT,
-    ),
-]
-
-OPENOCD_VERSION_NAMES = [v.name for v in OPENOCD_VERSIONS]
 
 initial_work_dir = Path(os.getcwd()).resolve()
 
@@ -145,17 +34,20 @@ def get_install_dir(version: str, program: str) -> Path:
 
 def parse_args() -> OpenOcdVersion:
     desc = (
-        "Script that downloads OpenOCD source code and performs the from-source build. "
+        "Script that downloads OpenOCD source code and performs the build. "
         "JimTcl is also built from source if needed."
     )
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument(
-        "version_name", choices=OPENOCD_VERSION_NAMES, help="OpenOCD version to build"
+        "--openocd-version",
+        choices=OPENOCD_VERSION_NAMES,
+        required=True,
+        help="OpenOCD version to build"
     )
     args = parser.parse_args()
 
-    assert args.version_name in OPENOCD_VERSION_NAMES
-    return next(v for v in OPENOCD_VERSIONS if v.name == args.version_name)
+    assert args.openocd_version in OPENOCD_VERSION_NAMES
+    return next(v for v in OPENOCD_VERSIONS if v.name == args.openocd_version)
 
 
 def recreate_dir(d: Path) -> None:
@@ -188,17 +80,18 @@ def prepare_libjim(version: OpenOcdVersion) -> None:
 
 def checkout_and_build_libjim(version: OpenOcdVersion) -> None:
     assert version.libjim not in [LIBJIM_INTERNAL, LIBJIM_FROM_APT]
+    assert not version.libjim.is_from_apt
+    assert not version.libjim.is_internal
+    assert version.libjim.repo is not None
+    assert version.libjim.git_rev is not None
 
     src_dir = get_src_dir(version.name, "libjim")
     install_dir = get_install_dir(version.name, "libjim")
     recreate_dir(src_dir)
     recreate_dir(install_dir)
 
-    libjim_rev = version.libjim.git_rev
-    assert libjim_rev is not None
-
-    run_cmd(["git", "clone", REPO_LIBJIM, "."], cwd=src_dir)
-    run_cmd(["git", "checkout", libjim_rev], cwd=src_dir)
+    run_cmd(["git", "clone", version.libjim.repo, "."], cwd=src_dir)
+    run_cmd(["git", "checkout", version.libjim.git_rev], cwd=src_dir)
     git_show_current_commit(cwd=src_dir)
 
     configure_cmd = [
@@ -211,7 +104,7 @@ def checkout_and_build_libjim(version: OpenOcdVersion) -> None:
     run_cmd(["make", f"-j{NPROC}"], cwd=src_dir)
     run_cmd(["make", "install"], cwd=src_dir)
 
-    # Make sure ./configure finds the built libjim library
+    # Make sure ./configure finds the just-built libjim library
     os.environ["PKG_CONFIG_PATH"] = str(install_dir / "lib" / "pkgconfig")
 
 

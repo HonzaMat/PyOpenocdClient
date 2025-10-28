@@ -26,7 +26,7 @@ jobs:
       - name: Build OpenOCD ${{ matrix.openocd_version }}
         run: |
           mkdir -p oocd-build && cd oocd-build
-          python3 ../tests_integration/build_openocd.py ${{ matrix.openocd_version }}
+          python3 ../tests_integration/build_openocd.py --openocd-version ${{ matrix.openocd_version }}
 
       - name: Install pytest
         run: |
@@ -36,7 +36,8 @@ jobs:
         run: |
           python3 run_tests.py integration \
               --force-pythonpath \
-              --openocd-path oocd-build/install/${{ matrix.openocd_version }}/openocd/bin/openocd
+              --openocd-path oocd-build/install/${{ matrix.openocd_version }}/openocd/bin/openocd \
+              --openocd-version ${{ matrix.openocd_version }}
 
   integration_test_windows:
     name: OpenOCD on Windows
@@ -59,6 +60,6 @@ jobs:
 
       - name: Run integration testing
         run: |
-          python3 run_tests.py integration --force-pythonpath --openocd-path xpack-openocd-0.12.0-6\\bin\\openocd
+          python3 run_tests.py integration --force-pythonpath --openocd-path xpack-openocd-0.12.0-6\\bin\\openocd --openocd-version vanilla-0.12.0
 
 
