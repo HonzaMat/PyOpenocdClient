@@ -25,7 +25,7 @@ def _is_tcp_port_open(port):
     s.settimeout(0.1)
     try:
         s.connect(("127.0.0.1", port))
-    except socket.error as e:
+    except socket.error:
         return False
     else:
         s.close()
@@ -33,14 +33,17 @@ def _is_tcp_port_open(port):
 
 
 def _wait_until(predicate, timeout):
+    """Wait until given predicate becomes true"""
     time_start = time.time()
     while True:
         if predicate():
-            # success
+            # Success
             return
         time_elapsed = time.time() - time_start
         if time_elapsed > timeout:
             raise TimeoutError()
+        # Safety - wait a little before retry
+        time.sleep(0.1)
 
 
 def _wait_until_tcp_port_open(port: int, timeout: float = 5.0):
