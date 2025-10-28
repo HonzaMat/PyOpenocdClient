@@ -18,7 +18,7 @@ fi
 python3 -m twine check dist/*
 
 if [ $PROD -ne 0 ]; then
-    python3 -m twine upload dist/*
+    python3 -m twine upload --verbose dist/*
 else
-    python3 -m twine upload --repository testpypi dist/*
+    python3 -m twine upload --verbose --repository testpypi dist/*
 fi

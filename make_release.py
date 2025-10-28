@@ -131,10 +131,24 @@ def main() -> int:
     print()
     print("Now don't forget to:")
     print()
-    print("- upload the release into PyPI:")
+    print("- upload the release into the testing PyPI:")
+    print("    ./upload_release.sh --test")
+    print()
+    print("- check that it can be installed as expected:")
+    print("    python3 -m venv /tmp/venv-pyopenocdclient")
+    print("    source /tmp/venv-pyopenocdclient/bin/activate")
+    print(
+        "    python3 -m pip install "
+        "--index-url https://test.pypi.org/simple/ PyOpenocdClient"
+    )
+    print()
+    print("- upload the release into the production PyPI:")
     print("    ./upload_release.sh --production")
     print()
-    print("- push the changes to the remote:")
+    print("- check the uploaded release on the PyPI website:")
+    print("    https://pypi.org/project/PyOpenocdClient/")
+    print()
+    print("- push the release-related commits to the git repo:")
     print("    git push origin HEAD && git push origin " + args.release_version)
     print()
 
