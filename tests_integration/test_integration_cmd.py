@@ -131,7 +131,7 @@ def test_version_tuple(openocd_process):
 
 def test_timeout_ok(openocd_process):
     with PyOpenocdClient() as ocd:
-        ocd.cmd("sleep 2000", timeout=3.0)
+        ocd.cmd("sleep 1000", timeout=2.0)
 
 
 def test_timeout_exceeded(openocd_process):
@@ -165,7 +165,7 @@ def test_shutdown(openocd_process):
         assert not ocd.is_connected()
 
         # Give OpenOCD time to exit - avoid races
-        time.sleep(2.0)
+        time.sleep(1.0)
         assert (
             openocd_process.poll() is not None
         ), "OpenOCD process did not terminate after shutdown command"
