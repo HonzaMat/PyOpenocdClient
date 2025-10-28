@@ -1,5 +1,10 @@
 # PyOpenocdClient
 
+[![Build documentation](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/build_doc.yml/badge.svg?event=schedule)](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/build_doc.yml)
+[![Code quality checks](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/code_quality.yml/badge.svg?event=schedule)](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/code_quality.yml)
+[![Unit tests](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/unit_tests.yml/badge.svg?event=schedule)](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/unit_tests.yml)
+[![Integration tests](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/integration_tests.yml/badge.svg?event=schedule)](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/integration_tests.yml)
+
 **PyOpenocdClient** is a Python library for controlling [OpenOCD](https://openocd.org)
 software tool.
 
@@ -15,7 +20,7 @@ Main features of PyOpenocdClient:
 
 * the code is fully covered via unit tests;
 
-* automatic integration testing against multiple version of OpenOCD;
+* automatic integration testing against multiple versions of OpenOCD;
 
 * the code is multiplatform and portable &mdash; it does not have any dependencies except for the Python's standard library;
 
