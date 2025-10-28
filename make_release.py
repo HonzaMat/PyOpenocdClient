@@ -137,7 +137,10 @@ def main() -> int:
     print("- check that it can be installed as expected:")
     print("    python3 -m venv /tmp/venv-pyopenocdclient")
     print("    source /tmp/venv-pyopenocdclient/bin/activate")
-    print("    python3 -m pip install --index-url https://test.pypi.org/simple/ PyOpenocdClient")
+    print(
+        "    python3 -m pip install "
+        "--index-url https://test.pypi.org/simple/ PyOpenocdClient"
+    )
     print()
     print("- upload the release into the production PyPI:")
     print("    ./upload_release.sh --production")
