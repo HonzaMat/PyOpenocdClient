@@ -22,7 +22,8 @@ jobs:
             python3.11           \
             python3.11-distutils \
             python3.12           \
-            python3.13
+            python3.13           \
+            python3.14
       - name: Install tox
         run: |
           python3 -m pip install --user tox
