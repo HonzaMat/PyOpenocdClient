@@ -165,7 +165,7 @@ def test_raw_cmd_shutdown(openocd_process):
 
         # Calling shutdown must cause the OpenOCD process to exit.
         # The command output must be empty.
-        assert ocd.raw_cmd("expr {1 + 2 + 3}") == "6"
+        assert ocd.raw_cmd("shutdown") == ""
 
         # Safety: Give OpenOCD little time to terminate, avoid races
         time.sleep(0.5)
@@ -175,7 +175,7 @@ def test_raw_cmd_shutdown(openocd_process):
 
         # Sending another command must cause a proper exception
         with pytest.raises(OcdConnectionError) as e:
-            ocd.raw_cmd("expr {4 + 5 + 6}")
+            ocd.raw_cmd("expr {1 + 2 + 3}")
 
         assert "Connection closed by OpenOCD" in str(e)
 
