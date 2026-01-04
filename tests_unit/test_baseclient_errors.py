@@ -87,20 +87,43 @@ def test_set_tcp_nodelay_error(socket_inst_mock):
     assert not ocd_base.is_connected()
 
 
+def test_remote_disconnect_before_sending_command(socket_inst_mock, select_mock):
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
+    ocd_base.connect()
+
+    # Pretend that the remote server (OpenOCD) closed the connection before
+    # we attempted to send the command
+    select_mock.return_value = [ocd_base._socket], [], []
+    socket_inst_mock.recv.side_effect = [b""]  # No data means closed connection
+
+    with pytest.raises(OcdConnectionError) as e:
+        ocd_base.raw_cmd("some_command")
+
+    assert "Connection closed by OpenOCD" in str(e)
+
+    socket_inst_mock.recv.assert_called_once()
+    socket_inst_mock.send.assert_not_called()
+
+    # Must be disconnected after an error
+    socket_inst_mock.close.assert_called_once()
+    assert not ocd_base.is_connected()
+
+
 def test_recv_extra_bytes_before_sending_command(socket_inst_mock, select_mock):
     ocd_base = _PyOpenocdBaseClient("localhost", 6666)
     ocd_base.connect()
 
-    # Pretend that some data arrived before the command
+    # Pretend that some data arrived before the command was even sent
     select_mock.return_value = [ocd_base._socket], [], []
+    socket_inst_mock.recv.side_effect = [b"unexpected recvd bytes"]
 
     with pytest.raises(OcdConnectionError) as e:
         ocd_base.raw_cmd("some_command")
 
     assert "Received unexpected bytes from OpenOCD" in str(e)
 
+    socket_inst_mock.recv.assert_called_once()
     socket_inst_mock.send.assert_not_called()
-    socket_inst_mock.recv.assert_not_called()
 
     # Must be disconnected after an error
     socket_inst_mock.close.assert_called_once()
