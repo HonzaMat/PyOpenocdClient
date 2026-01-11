@@ -1,8 +1,14 @@
 # SPDX-License-Identifier: MIT
 
+import time
+
 import pytest
 
-from py_openocd_client import OcdCommandTimeoutError, PyOpenocdClient
+from py_openocd_client import (
+    OcdCommandTimeoutError,
+    OcdConnectionError,
+    PyOpenocdClient,
+)
 
 
 def test_no_output(openocd_process):
@@ -153,3 +159,31 @@ def test_raw_cmd_timeout_exceeded(openocd_process):
 
         assert e.value.raw_cmd == "sleep 2000"
         assert e.value.timeout == 1.0
+
+
+def test_raw_cmd_shutdown(openocd_process):
+    with PyOpenocdClient() as ocd:
+
+        # Test that the connection works and commands are serviced
+        assert ocd.is_connected()
+        assert "On-Chip Debugger" in ocd.raw_cmd("version")
+
+        # Calling shutdown must cause the OpenOCD process to exit.
+        # The command output must be empty.
+        assert ocd.raw_cmd("shutdown") == ""
+
+        # Safety: Give OpenOCD little time to terminate, avoid races
+        time.sleep(0.5)
+
+        assert (
+            openocd_process.poll() is not None
+        ), "OpenOCD did not terminate after shutdown command"
+
+        # Sending another command must cause a proper exception
+        with pytest.raises(OcdConnectionError) as e:
+            ocd.raw_cmd("expr {1 + 2 + 3}")
+
+        assert "Connection closed by OpenOCD" in str(e)
+
+        # Due to the exception, we must be disconnected
+        assert not ocd.is_connected()

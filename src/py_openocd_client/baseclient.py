@@ -94,10 +94,26 @@ class _PyOpenocdBaseClient:
             raise ValueError("Timeout must be greater than zero")
         self._default_recv_timeout = timeout
 
-    def _check_no_premature_recvd_bytes(self) -> None:
+    def _check_connection_before_command(self) -> None:
         assert self._socket is not None
         rd, _, _ = select.select([self._socket], [], [], 0)  # Don't block, just poll
-        if len(rd) > 0:
+
+        if len(rd) == 0:
+            # The socket is not ready for recv() now, which is the expected state.
+            # Success.
+            return
+
+        # The socket is ready for recv(). This is an error.
+        # Find out what happened:
+        recvd_data = self._socket.recv(128)
+        if len(recvd_data) == 0:
+            # Empty received data means that the connection got closed by OpenOCD
+            # in the meanwhile.
+            raise OcdConnectionError("Connection closed by OpenOCD")
+        else:
+            # It looks like OpenOCD sent us some extra, unsolicited bytes (without us
+            # sending any command to OpenOCD). This is a violation of the communication
+            # protocol.
             raise OcdConnectionError(
                 "Received unexpected bytes from OpenOCD before "
                 "the command was even sent."
@@ -108,7 +124,7 @@ class _PyOpenocdBaseClient:
         assert self._socket is not None
 
         # Safety:
-        self._check_no_premature_recvd_bytes()
+        self._check_connection_before_command()
 
         data = raw_cmd.encode(self.CHARSET) + self.COMMAND_DELIMITER
         self._socket.settimeout(self.SEND_TIMEOUT)
