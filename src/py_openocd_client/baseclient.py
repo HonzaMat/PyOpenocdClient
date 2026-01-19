@@ -167,7 +167,8 @@ class _PyOpenocdBaseClient:
             self._socket.settimeout(self.RECV_POLL_TIMEOUT)
         except OSError as e:
             raise OcdConnectionError(
-                "Could not receive a response from OpenOCD, failed to set socket timeout"
+                "Could not receive a response from OpenOCD, "
+                "failed to set socket timeout"
             ) from e
 
         time_start = time.time()

@@ -198,12 +198,18 @@ def test_raw_cmd_socket_settimeout_error_before_recv(socket_inst_mock):
     ocd_base = _PyOpenocdBaseClient("localhost", 6666)
     ocd_base.connect()
 
-    socket_inst_mock.settimeout.side_effect = [None, OSError("socket settimeout() failed")]
+    socket_inst_mock.settimeout.side_effect = [
+        None,
+        OSError("socket settimeout() failed"),
+    ]
 
     with pytest.raises(OcdConnectionError) as e:
         ocd_base.raw_cmd("some_cmd")
 
-    assert "Could not receive a response from OpenOCD, failed to set socket timeout" in str(e)
+    assert (
+        "Could not receive a response from OpenOCD, failed to set socket timeout"
+        in str(e)
+    )
 
     socket_inst_mock.send.assert_called_once()
     socket_inst_mock.recv.assert_not_called()
