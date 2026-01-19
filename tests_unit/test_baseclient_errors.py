@@ -176,6 +176,95 @@ def test_raw_cmd_connection_closed_by_openocd(socket_inst_mock):
     assert not ocd_base.is_connected()
 
 
+def test_raw_cmd_socket_settimeout_error_before_send(socket_inst_mock):
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
+    ocd_base.connect()
+
+    socket_inst_mock.settimeout.side_effect = [OSError("socket settimeout() failed")]
+
+    with pytest.raises(OcdConnectionError) as e:
+        ocd_base.raw_cmd("some_cmd")
+
+    assert "Could not send a command to OpenOCD, failed to set socket timeout" in str(e)
+
+    socket_inst_mock.settimeout.assert_called_once()
+    socket_inst_mock.send.assert_not_called()
+    socket_inst_mock.recv.assert_not_called()
+    socket_inst_mock.close.assert_called_once()
+    assert not ocd_base.is_connected()
+
+
+def test_raw_cmd_socket_settimeout_error_before_recv(socket_inst_mock):
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
+    ocd_base.connect()
+
+    socket_inst_mock.settimeout.side_effect = [None, OSError("socket settimeout() failed")]
+
+    with pytest.raises(OcdConnectionError) as e:
+        ocd_base.raw_cmd("some_cmd")
+
+    assert "Could not receive a response from OpenOCD, failed to set socket timeout" in str(e)
+
+    socket_inst_mock.send.assert_called_once()
+    socket_inst_mock.recv.assert_not_called()
+    socket_inst_mock.close.assert_called_once()
+    assert not ocd_base.is_connected()
+
+
+def test_raw_cmd_socket_send_error(socket_inst_mock):
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
+    ocd_base.connect()
+
+    socket_inst_mock.send.side_effect = OSError("socket send() failed")
+
+    with pytest.raises(OcdConnectionError) as e:
+        ocd_base.raw_cmd("some_cmd")
+
+    assert "Could not send a command to OpenOCD, socket error occurred" in str(e)
+
+    socket_inst_mock.send.assert_called_once()
+    socket_inst_mock.recv.assert_not_called()
+    socket_inst_mock.close.assert_called_once()
+    assert not ocd_base.is_connected()
+
+
+def test_raw_cmd_socket_recv_error_before_send(socket_inst_mock):
+    with mock.patch("select.select") as m:
+        m.return_value = [socket_inst_mock], [], []
+
+        ocd_base = _PyOpenocdBaseClient("localhost", 6666)
+        ocd_base.connect()
+
+        socket_inst_mock.recv.side_effect = [OSError("socket recv() failed")]
+
+        with pytest.raises(OcdConnectionError) as e:
+            ocd_base.raw_cmd("some_cmd")
+
+        assert "Connection to OpenOCD broken for an unknown reason" in str(e)
+
+        socket_inst_mock.send.assert_not_called()
+        socket_inst_mock.recv.assert_called_once()
+        socket_inst_mock.close.assert_called_once()
+        assert not ocd_base.is_connected()
+
+
+def test_raw_cmd_socket_recv_error_after_send(socket_inst_mock):
+    ocd_base = _PyOpenocdBaseClient("localhost", 6666)
+    ocd_base.connect()
+
+    socket_inst_mock.recv.side_effect = [OSError("socket recv() failed")]
+
+    with pytest.raises(OcdConnectionError) as e:
+        ocd_base.raw_cmd("some_cmd")
+
+    assert "Could not receive a response from OpenOCD, socket error occurred" in str(e)
+
+    socket_inst_mock.send.assert_called_once()
+    socket_inst_mock.recv.assert_called_once()
+    socket_inst_mock.close.assert_called_once()
+    assert not ocd_base.is_connected()
+
+
 def test_raw_cmd_extra_bytes_after_delimiter(socket_inst_mock):
     ocd_base = _PyOpenocdBaseClient("localhost", 6666)
     ocd_base.connect()
