@@ -103,9 +103,18 @@ class _PyOpenocdBaseClient:
             # Success.
             return
 
-        # The socket is ready for recv(). This is an error.
-        # Find out what happened:
-        recvd_data = self._socket.recv(128)
+        # The socket is ready for recv(). This is unexpected at this point
+        # and always means an error. Try receive from the socket to find out
+        # what happened:
+        try:
+            recvd_data = self._socket.recv(128)
+        except OSError as e:
+            # This is unlikely to happen: It would mean that the socket is ready
+            # for recv() but then recv() failed.
+            raise OcdConnectionError(
+                "Connection to OpenOCD broken for an unknown reason"
+            ) from e
+
         if len(recvd_data) == 0:
             # Empty received data means that the connection got closed by OpenOCD
             # in the meanwhile.
@@ -123,12 +132,27 @@ class _PyOpenocdBaseClient:
         assert self.is_connected()
         assert self._socket is not None
 
-        # Safety:
+        # Perform basic connection check before sending a command.
+        # Note that this is merely a safety/correctness check which itself
+        # does not guarantee that the subsequent send() and recv() calls
+        # will succeed.
         self._check_connection_before_command()
 
         data = raw_cmd.encode(self.CHARSET) + self.COMMAND_DELIMITER
-        self._socket.settimeout(self.SEND_TIMEOUT)
-        self._socket.send(data)
+
+        try:
+            self._socket.settimeout(self.SEND_TIMEOUT)
+        except OSError as e:
+            raise OcdConnectionError(
+                "Could not send a command to OpenOCD, failed to set socket timeout"
+            ) from e
+
+        try:
+            self._socket.send(data)
+        except OSError as e:
+            raise OcdConnectionError(
+                "Could not send a command to OpenOCD, socket error occurred"
+            ) from e
 
     def _do_recv_response(self, raw_cmd: str, timeout: Optional[float] = None) -> str:
         assert self.is_connected()
@@ -139,7 +163,13 @@ class _PyOpenocdBaseClient:
             timeout if timeout is not None else self._default_recv_timeout
         )
 
-        self._socket.settimeout(self.RECV_POLL_TIMEOUT)
+        try:
+            self._socket.settimeout(self.RECV_POLL_TIMEOUT)
+        except OSError as e:
+            raise OcdConnectionError(
+                "Could not receive a response from OpenOCD, "
+                "failed to set socket timeout"
+            ) from e
 
         time_start = time.time()
         while time.time() < (time_start + effective_timeout):
@@ -147,6 +177,10 @@ class _PyOpenocdBaseClient:
                 d = self._socket.recv(self.RECV_BLOCK_SIZE)
             except socket.timeout:
                 continue
+            except OSError as e:
+                raise OcdConnectionError(
+                    "Could not receive a response from OpenOCD, socket error occurred"
+                ) from e
 
             if d == b"":
                 raise OcdConnectionError("Connection closed by OpenOCD")
