@@ -47,11 +47,13 @@ jobs:
   Check_coverage:
     runs-on: ubuntu-22.04
     steps:
-      - name: Run unit tess with coverage check (single python version)
+      - name: Check out the repository code
+        uses: actions/checkout@v4
+      - name: Run unit tests with coverage check (single python version)
         run: |
           python3 --version
           python3 -m pip install --user nox
-          python3 -m nox -s tests_unit_coverage
+          nox -s tests_unit_coverage
       - name: Store coverage reports
         uses: actions/upload-artifact@v4
         if: always()

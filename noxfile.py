@@ -71,7 +71,6 @@ def code_quality(session):
 
 @nox.session(python=["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"])
 def tests_unit(session):
-    print(session)
     session.install(".")
     session.install("pytest")
     session.run("python3", "-m", "pytest", "tests_unit/", "-vv")
