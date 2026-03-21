@@ -55,12 +55,9 @@ def code_quality(session):
         _this_dir() / "tests_integration",
     ]
     utils = [
-        _this_dir() / "build_doc.py",
-        _this_dir() / "run_code_quality_check.py",
-        _this_dir() / "run_tests.py",
-        _this_dir() / "check_full_coverage.py",
         _this_dir() / "make_release.py",
         _this_dir() / "tests_integration" / "build_openocd.py",
+        _this_dir() / "tests_integration" / "openocd_version_info.py",
     ]
     noxfile = [_this_dir() / "noxfile.py"]
 
