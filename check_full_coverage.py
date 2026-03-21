@@ -4,10 +4,9 @@
 
 import argparse
 import sys
-from pathlib import Path
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-
+from pathlib import Path
 
 DIRS_TO_INCLUDE = [
     "src/",
@@ -27,7 +26,7 @@ def parse_args() -> argparse.Namespace:
         description="Check that all code lines are fully covered"
     )
 
-    def _check_existing_file(arg: str):
+    def _check_existing_file(arg: str) -> Path:
         f = Path(arg)
         if not f.is_file():
             raise argparse.ArgumentTypeError(f"This is not a file: {arg}")
@@ -45,7 +44,7 @@ def get_coverage_entries(coverage_xml: Path) -> list[CoverageEntry]:
 
     result = []
     root = ET.fromstring(coverage_xml.read_text())
-    for class_item in root.iter('class'):
+    for class_item in root.iter("class"):
 
         # safety
         if "filename" not in class_item.attrib:
