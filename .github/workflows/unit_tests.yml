@@ -29,7 +29,7 @@ jobs:
       - name: Install nox
         run: |
           python3 -m pip install --user nox
-      - name: Run unit tests (multiple python versions)
+      - name: Run unit tests
         run: |
           nox -s tests_unit
 
@@ -38,11 +38,11 @@ jobs:
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v4
-      - name: Run unit tests (single python version)
+      - name: Run unit tests
         run: |
           python3 --version
           python3 -m pip install --user nox
-          python3 -m nox -s tests_unit
+          python3 -m nox -s tests_unit-3.10 tests_unit-3.11 tests_unit-3.12 tests_unit-3.13 tests_unit-3.14
 
   Check_coverage:
     runs-on: ubuntu-22.04
