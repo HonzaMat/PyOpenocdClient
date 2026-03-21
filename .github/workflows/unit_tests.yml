@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '42 20 * * 2,4,6'
 jobs:
-  Run_unit_tests_ubuntu_22_04:
+  Run_unit_tests_ubuntu_22_04_py38_and_newer:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out the repository code
@@ -15,8 +15,6 @@ jobs:
           sudo add-apt-repository ppa:deadsnakes/ppa
           sudo apt-get update
           sudo apt-get install   \
-            python3.7            \
-            python3.7-distutils  \
             python3.8            \
             python3.8-distutils  \
             python3.9            \
