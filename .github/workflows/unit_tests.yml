@@ -70,19 +70,13 @@ jobs:
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v4
-      - name: Install python interpreters
-        run: |
-          sudo apt-get update
-          sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt-get update
-          sudo apt-get install python3.14 python3.14-setuptools
       - name: Install python packages
         run: |
-          python3.14 --version
-          python3.14 -m pip install --user pytest coverage
+          python3 --version
+          python3 -m pip install --user pytest coverage
       - name: Run unit testing with coverage collection
         run: |
-          python3.14 run_tests.py unit --force-pythonpath --coverage
+          python3 run_tests.py unit --force-pythonpath --coverage
       - name: Store coverage reports
         uses: actions/upload-artifact@v4
         with:
@@ -92,4 +86,4 @@ jobs:
             htmlcov/**
       - name: Check for full coverage
         run: |
-          python3.14 check_full_coverage.py coverage.xml
+          python3 check_full_coverage.py coverage.xml
