@@ -31,7 +31,7 @@ jobs:
       - name: Run integration test
         run: |
           python3 -m pip install --user nox
-          nox -s tests_integration \
+          nox -s tests_integration -- \
               --openocd-path oocd-build/install/${{ matrix.openocd_version }}/openocd/bin/openocd \
               --openocd-version ${{ matrix.openocd_version }}
 
