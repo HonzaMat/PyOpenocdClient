@@ -12,7 +12,7 @@ jobs:
 
       - name: Build the documentation
         run: |
-          python3 -m pip --user install nox
+          python3 -m pip install --user nox
           nox -s build_doc
 
 

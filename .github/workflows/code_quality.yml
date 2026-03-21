@@ -12,7 +12,7 @@ jobs:
 
       - name: Perform the check
         run: |
-          python3 -m pip --user install nox
+          python3 -m pip install --user nox
           nox -s code_quality
 
 
