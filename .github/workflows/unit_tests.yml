@@ -30,6 +30,7 @@ jobs:
       - name: Run unit testing (on Python 3.8 and newer, using tox)
         run: |
           python3 -m tox
+
   Run_unit_tests_ubuntu_22_04_py37:
     runs-on: ubuntu-22.04
     steps:
@@ -63,3 +64,26 @@ jobs:
           python3 --version
           python3 -m pip install --user pytest
           python3 run_tests.py unit --force-pythonpath
+
+  Check_coverage:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out the repository code
+        uses: actions/checkout@v4
+      - name: Install python packages
+        run: |
+          python3 --version
+          python3 -m pip install --user pytest coverage
+      - name: Run unit testing with coverage collection
+        run: |
+          python3 run_tests.py unit --force-pythonpath --coverage
+      - name: Store coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            coverage.xml
+            htmlcov/**
+      - name: Check for full coverage
+        run: |
+          python3 check_full_coverage.py coverage.xml
