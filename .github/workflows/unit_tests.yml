@@ -31,7 +31,7 @@ jobs:
           python3 -m pip install --user nox
       - name: Run unit tests
         run: |
-          nox -s tests_unit -k "not 3.7"
+          nox -s tests_unit
 
   Run_unit_tests_ubuntu_22_04_py37:
     runs-on: ubuntu-22.04
@@ -54,6 +54,7 @@ jobs:
           python3.7 -m pip install pytest
       - name: Run unit testing (on legacy Python 3.7)
         run: |
+          python3.7 -m pip install .
           python3.7 -m pytest tests_unit/ -vv
   Run_unit_tests_windows_2022:
     runs-on: windows-2022
