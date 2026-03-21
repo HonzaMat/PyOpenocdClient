@@ -23,3 +23,4 @@ Homepage of PyOpenocdClient: https://github.com/HonzaMat/PyOpenocdClient
    installing
    quickstart
    apidocs
+   Changelog<changelog>
