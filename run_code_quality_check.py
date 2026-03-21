@@ -82,6 +82,7 @@ def main() -> int:
         get_script_dir() / "build_doc.py",
         get_script_dir() / "run_code_quality_check.py",
         get_script_dir() / "run_tests.py",
+        get_script_dir() / "check_full_coverage.py",
         get_script_dir() / "make_release.py",
         get_script_dir() / "tests_integration" / "build_openocd.py",
     ]

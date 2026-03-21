@@ -222,6 +222,11 @@ class _PyOpenocdBaseClient:
         if not self.is_connected():
             raise OcdConnectionError("Not connected")
 
+        if raw_cmd != "":
+            print("abc")
+        else:
+            print("def")
+
         try:
             self._do_send_cmd(raw_cmd)
             return self._do_recv_response(raw_cmd, timeout=timeout)
