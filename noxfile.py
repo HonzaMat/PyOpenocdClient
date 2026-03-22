@@ -91,7 +91,7 @@ def tests_unit_coverage(session):
         "-m",
         "pytest",
         "tests_unit/",
-        "-vv", 
+        "-vv",
         *session.posargs,
     )
     session.run("python3", "-m", "coverage", "xml")

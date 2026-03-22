@@ -39,7 +39,7 @@ def test_return_with_whitespace(openocd_process, has_return_whitespace_bug):
 
 def test_return_with_newline(openocd_process, has_return_whitespace_bug):
     with PyOpenocdClient() as ocd:
-        out = ocd.raw_cmd("return \" \\n abc \\n4567 \"")
+        out = ocd.raw_cmd('return " \\n abc \\n4567 "')
 
         if has_return_whitespace_bug:
             assert out == "abc \n4567"
@@ -56,13 +56,15 @@ def test_string_concat_with_whitespace(openocd_process):
 
 def test_string_concat_with_newline(openocd_process):
     with PyOpenocdClient() as ocd:
-        out = ocd.raw_cmd("string repeat \" abc\\n \" 4")
+        out = ocd.raw_cmd('string repeat " abc\\n " 4')
         assert out == " abc\n  abc\n  abc\n  abc\n "
 
 
-def test_string_concat_with_newline_and_return(openocd_process, has_return_whitespace_bug):
+def test_string_concat_with_newline_and_return(
+    openocd_process, has_return_whitespace_bug
+):
     with PyOpenocdClient() as ocd:
-        out = ocd.raw_cmd("return [string repeat \" abc\\n \" 4]")
+        out = ocd.raw_cmd('return [string repeat " abc\\n " 4]')
         if has_return_whitespace_bug:
             assert out == "abc\n  abc\n  abc\n  abc"
             pytest.xfail("known OpenOCD whitespace bug")
@@ -144,7 +146,9 @@ def test_catch_output_and_success_whitespace(openocd_process):
 
 def test_catch_output_and_error(openocd_process):
     with PyOpenocdClient() as ocd:
-        cmd = 'set RETCODE [ catch { nonexistent_cmd } OUT; ]; return "<$RETCODE,$OUT>" '
+        cmd = (
+            'set RETCODE [ catch { nonexistent_cmd } OUT; ]; return "<$RETCODE,$OUT>" '
+        )
         out = ocd.raw_cmd(cmd)
         retcode, text = _parse_out(out)
 
@@ -165,7 +169,8 @@ def test_catch_output_and_throw(openocd_process):
 def test_catch_output_and_throw_whitespace(openocd_process):
     with PyOpenocdClient() as ocd:
         cmd = (
-            'set RETCODE [catch { throw 25 { my msg  } } OUT;]; return "<$RETCODE,$OUT>"'
+            "set RETCODE [catch { throw 25 { my msg  } } OUT;]; "
+            'return "<$RETCODE,$OUT>"'
         )
         out = ocd.raw_cmd(cmd)
         retcode, text = _parse_out(out)

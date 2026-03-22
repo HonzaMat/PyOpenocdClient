@@ -222,9 +222,9 @@ class PyOpenocdClient:
 
         def is_expected_raw_result(s: str) -> bool:
             return (
-                s.startswith("<") and
-                s.endswith(">") and
-                re.match(r"^<-?\d+,", s) is not None
+                s.startswith("<")
+                and s.endswith(">")
+                and re.match(r"^<-?\d+,", s) is not None
             )
 
         if not is_expected_raw_result(raw_result):

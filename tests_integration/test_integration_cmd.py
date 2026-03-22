@@ -20,19 +20,19 @@ def test_expr(openocd_process):
 
 def test_string_concat(openocd_process):
     with PyOpenocdClient() as ocd:
-        result = ocd.cmd("string repeat \"abc\" 3")
+        result = ocd.cmd('string repeat "abc" 3')
         assert result.out == "abcabcabc"
 
 
 def test_string_concat_whitespace(openocd_process):
     with PyOpenocdClient() as ocd:
-        result = ocd.cmd("string repeat \" abc \" 3")
+        result = ocd.cmd('string repeat " abc " 3')
         assert result.out == " abc  abc  abc "
 
 
 def test_string_concat_multiline(openocd_process):
     with PyOpenocdClient() as ocd:
-        result = ocd.cmd("string repeat \" abc\\n \" 3")
+        result = ocd.cmd('string repeat " abc\\n " 3')
         assert result.out == " abc\n  abc\n  abc\n "
 
 
@@ -54,7 +54,7 @@ def test_echo_with_capture(openocd_process):
 
 def test_echo_with_capture_whitespace(openocd_process):
     with PyOpenocdClient() as ocd:
-        result = ocd.cmd("echo \"  some text \"", capture=True)
+        result = ocd.cmd('echo "  some text "', capture=True)
         assert result.retcode == 0
 
         # "echo" appends \n at the end
@@ -63,7 +63,7 @@ def test_echo_with_capture_whitespace(openocd_process):
 
 def test_echo_with_capture_multiline(openocd_process):
     with PyOpenocdClient() as ocd:
-        result = ocd.cmd("echo \" \\nabc \\n d ef \\n  ghi  \\n \"", capture=True)
+        result = ocd.cmd('echo " \\nabc \\n d ef \\n  ghi  \\n "', capture=True)
         assert result.retcode == 0
 
         # "echo" appends \n at the end
