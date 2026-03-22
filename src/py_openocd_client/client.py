@@ -211,25 +211,34 @@ class PyOpenocdClient:
             raw_cmd = cmd
 
         raw_cmd = "set CMD_RETCODE [ catch { " + raw_cmd + " } CMD_OUTPUT ] ; "
-        raw_cmd += 'return "$CMD_RETCODE $CMD_OUTPUT" ; '
+
+        # Older OpenOCD versions - prior to 93f16eed4(*) - incorrectly trimmed trailing
+        # whitespace from the string passed to the return command. Work around this bug
+        # by wrapping the string by non-whitespace characters.
+        # (*): https://review.openocd.org/c/openocd/+/9084
+        raw_cmd += 'return "<$CMD_RETCODE,$CMD_OUTPUT>" ; '
 
         raw_result = self.raw_cmd(raw_cmd, timeout=timeout)
 
-        # Verify the raw output from OpenOCD the has the expected format. It can be:
-        #
-        # - Command return code (positive or negative decimal number) and that's it.
-        #
-        # - Or, command return code (positive or negative decimal number) followed by
-        #   a space character and optionally followed by the command's textual output.
-        if re.match(r"^-?\d+($| )", raw_result) is None:
+        def is_expected_raw_result(s: str) -> bool:
+            return (
+                s.startswith("<")
+                and s.endswith(">")
+                and re.match(r"^<-?\d+,", s) is not None
+            )
+
+        if not is_expected_raw_result(raw_result):
             msg = (
                 "Received unexpected response from OpenOCD. "
                 "It looks like OpenOCD misbehaves. "
             )
             raise OcdInvalidResponseError(msg, raw_cmd, raw_result)
 
-        raw_result_parts = raw_result.split(" ", maxsplit=1)
-        assert len(raw_result_parts) in [1, 2]
+        # Remove leading "<" and trailing ">"
+        raw_result = raw_result[1:-1]
+        raw_result_parts = raw_result.split(",", maxsplit=1)
+        assert len(raw_result_parts) == 2
+
         retcode = int(raw_result_parts[0], 10)
         out = raw_result_parts[1] if len(raw_result_parts) == 2 else ""
 

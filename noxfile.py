@@ -73,7 +73,7 @@ def code_quality(session):
 def tests_unit(session):
     session.install(".")
     session.install("pytest")
-    session.run("python3", "-m", "pytest", "tests_unit/", "-vv")
+    session.run("python3", "-m", "pytest", "tests_unit/", "-vv", *session.posargs)
 
 
 @nox.session
@@ -84,7 +84,15 @@ def tests_unit_coverage(session):
 
     session.install("pytest", "coverage")
     session.run(
-        "python3", "-m", "coverage", "run", "-m", "pytest", "tests_unit/", "-vv"
+        "python3",
+        "-m",
+        "coverage",
+        "run",
+        "-m",
+        "pytest",
+        "tests_unit/",
+        "-vv",
+        *session.posargs,
     )
     session.run("python3", "-m", "coverage", "xml")
     session.run("python3", "-m", "coverage", "html")

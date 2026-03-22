@@ -18,6 +18,24 @@ def test_expr(openocd_process):
         assert result.out == "6"
 
 
+def test_string_concat(openocd_process):
+    with PyOpenocdClient() as ocd:
+        result = ocd.cmd('string repeat "abc" 3')
+        assert result.out == "abcabcabc"
+
+
+def test_string_concat_whitespace(openocd_process):
+    with PyOpenocdClient() as ocd:
+        result = ocd.cmd('string repeat " abc " 3')
+        assert result.out == " abc  abc  abc "
+
+
+def test_string_concat_multiline(openocd_process):
+    with PyOpenocdClient() as ocd:
+        result = ocd.cmd('string repeat " abc\\n " 3')
+        assert result.out == " abc\n  abc\n  abc\n "
+
+
 def test_echo(openocd_process):
     with PyOpenocdClient() as ocd:
         result = ocd.cmd("echo {some text}")
@@ -25,17 +43,31 @@ def test_echo(openocd_process):
         assert result.out == ""  # because capture was not set
 
 
-def test_echo_with_capture(openocd_process, has_buggy_whitespace_trim):
+def test_echo_with_capture(openocd_process):
     with PyOpenocdClient() as ocd:
         result = ocd.cmd("echo {some text}", capture=True)
         assert result.retcode == 0
 
         # "echo" appends \n at the end
-        if has_buggy_whitespace_trim:
-            assert result.out == "some text"
-            pytest.xfail("known OpenOCD whitespace bug")
-        else:
-            assert result.out == "some text\n"
+        assert result.out == "some text\n"
+
+
+def test_echo_with_capture_whitespace(openocd_process):
+    with PyOpenocdClient() as ocd:
+        result = ocd.cmd('echo "  some text "', capture=True)
+        assert result.retcode == 0
+
+        # "echo" appends \n at the end
+        assert result.out == "  some text \n"
+
+
+def test_echo_with_capture_multiline(openocd_process):
+    with PyOpenocdClient() as ocd:
+        result = ocd.cmd('echo " \\nabc \\n d ef \\n  ghi  \\n "', capture=True)
+        assert result.retcode == 0
+
+        # "echo" appends \n at the end
+        assert result.out == " \nabc \n d ef \n  ghi  \n \n"
 
 
 def test_failed_cmd(openocd_process):
@@ -81,16 +113,12 @@ def test_failed_cmd_dont_throw(openocd_process):
         assert "invalid command" in result.out
 
 
-def test_assign_variable_and_read_by_echo(openocd_process, has_buggy_whitespace_trim):
+def test_assign_variable_and_read_by_echo(openocd_process):
     with PyOpenocdClient() as ocd:
         ocd.cmd("set MY_VARIALBLE 123456")
         result = ocd.cmd("echo $MY_VARIALBLE", capture=True)
-
-        if has_buggy_whitespace_trim:
-            assert result.out == "123456"
-            pytest.xfail("known OpenOCD whitespace bug")
-        else:
-            assert result.out == "123456\n"
+        # "echo" appends \n at the end
+        assert result.out == "123456\n"
 
 
 def test_assign_variable_and_read_by_set(openocd_process):
@@ -141,12 +169,13 @@ def test_timeout_exceeded(openocd_process):
 
         expected_raw_cmd = (
             "set CMD_RETCODE [ catch { sleep 2000 } CMD_OUTPUT ] ; "
-            'return "$CMD_RETCODE $CMD_OUTPUT" ; '
+            'return "<$CMD_RETCODE,$CMD_OUTPUT>" ; '
         )
         assert e.value.raw_cmd == expected_raw_cmd
         assert e.value.timeout == 1.0
 
-        # Timeout causes re-connection, we must remain connected.
+        # Timeout causes re-connection internally.
+        # From the user perspective, we must remain connected.
         assert ocd.is_connected()
 
         # Commands must still work

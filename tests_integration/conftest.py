@@ -33,7 +33,7 @@ def _is_tcp_port_open(port):
 
 
 def _wait_until(predicate, timeout):
-    """Wait until given predicate becomes true"""
+    """Wait until the given predicate becomes true"""
     time_start = time.time()
     while True:
         if predicate():
@@ -81,9 +81,10 @@ def openocd_version(pytestconfig):
 
 
 @pytest.fixture
-def has_buggy_whitespace_trim(openocd_version):
+def has_return_whitespace_bug(openocd_version):
     """
-    Detect if the OpenOCD version being tested has a known buggy whitespace handling.
+    Return if the OpenOCD version being tested has a known buggy whitespace handling
+    in the "return" command.
 
     In OpenOCD prior to version 0.13.0, the "return" command performed extra
     whitespace trimming on the command output. This was fixed in commit "93f16eed4,
@@ -95,6 +96,14 @@ def has_buggy_whitespace_trim(openocd_version):
         "vanilla-0.12.0",
         "riscv-master-libjim-from-apt",
     ]
+
+
+def pytest_sessionstart(session):
+    if _is_tcp_port_open(TCL_PORT_NUM):
+        raise RuntimeError(
+            f"TCP port {TCL_PORT_NUM} is already occupied. Please terminate any "
+            "OpenOCD processes before starting the integration tests."
+        )
 
 
 @pytest.fixture
