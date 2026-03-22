@@ -10,12 +10,9 @@ jobs:
       - name: Check out the repository code
         uses: actions/checkout@v4
 
-      - name: Install code quality tools
-        run: |
-          python3 -m pip install --user -r requirements_code_quality.txt
-
       - name: Perform the check
         run: |
-          python3 run_code_quality_check.py
+          python3 -m pip install --user nox
+          nox -s code_quality
 
 

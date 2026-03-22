@@ -10,13 +10,13 @@ jobs:
       - name: Check out the repository code
         uses: actions/checkout@v4
 
-      - name: Install tools for documentation
-        run: |
-          python3 -m pip install --user -r requirements_doc.txt
-
       - name: Build the documentation
         run: |
-          python3 build_doc.py
-
-
-
+          python3 -m pip install --user nox
+          nox -s build_doc
+      - name: Store the documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: doc-html
+          path: |
+            doc/_build/html

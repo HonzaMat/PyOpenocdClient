@@ -293,10 +293,10 @@ def _prepare_big_response(size: int) -> List[bytes]:
     assert size > 0
     resp = b"a" * (size - 1) + _COMMAND_DELIMITER
     # split to chunks of 1 kB maximum
-    return list(_chunks(resp, 1024))
+    return list(_split_to_chunks(resp, 1024))
 
 
-def _chunks(lst, n):
+def _split_to_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i : i + n]

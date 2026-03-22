@@ -24,12 +24,12 @@ jobs:
             python3.12           \
             python3.13           \
             python3.14
-      - name: Install tox
+      - name: Install nox
         run: |
-          python3 -m pip install --user tox
-      - name: Run unit testing (on Python 3.8 and newer, using tox)
+          python3 -m pip install --user nox
+      - name: Run unit tests
         run: |
-          python3 -m tox
+          nox -s tests_unit
 
   Run_unit_tests_ubuntu_22_04_py37:
     runs-on: ubuntu-22.04
@@ -47,43 +47,39 @@ jobs:
       - name: Install PIP version that still supports Python 3.7
         run: |
           python3.7 -m pip install --user pip==23.3.2
-      - name: Install tox
+      - name: Install pytest
         run: |
-          python3.7 -m pip install --user tox
+          python3.7 -m pip install pytest
       - name: Run unit testing (on legacy Python 3.7)
         run: |
-          python3.7 -m tox -e py37
-
+          python3.7 -m pip install .
+          python3.7 -m pytest tests_unit/ -vv
   Run_unit_tests_windows_2022:
     runs-on: windows-2022
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v4
-      - name: Run unit testing (single python version)
+      - name: Run unit tests
         run: |
           python3 --version
-          python3 -m pip install --user pytest
-          python3 run_tests.py unit --force-pythonpath
+          python3 -m pip install --user nox
+          python3 -m nox -s tests_unit-3.10 tests_unit-3.11 tests_unit-3.12 tests_unit-3.13 tests_unit-3.14
 
   Check_coverage:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v4
-      - name: Install python packages
+      - name: Run unit tests with coverage check (single python version)
         run: |
           python3 --version
-          python3 -m pip install --user pytest coverage
-      - name: Run unit testing with coverage collection
-        run: |
-          python3 run_tests.py unit --force-pythonpath --coverage
+          python3 -m pip install --user nox
+          nox -s tests_unit_coverage
       - name: Store coverage reports
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: coverage-reports
           path: |
             coverage.xml
             htmlcov/**
-      - name: Check for full coverage
-        run: |
-          python3 check_full_coverage.py coverage.xml
