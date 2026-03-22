@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out the repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install python interpreters
         run: |
           sudo apt-get update
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out the repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install python interpreter
         run: |
           sudo apt-get update
@@ -58,7 +58,7 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Check out the repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Run unit tests
         run: |
           python3 --version
@@ -69,14 +69,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out the repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Run unit tests with coverage check (single python version)
         run: |
           python3 --version
           python3 -m pip install --user nox
           nox -s tests_unit_coverage
       - name: Store coverage reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: coverage-reports
