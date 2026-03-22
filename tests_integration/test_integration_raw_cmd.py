@@ -26,15 +26,48 @@ def test_return(openocd_process):
         assert out == "abcdef"
 
 
-def test_return_with_whitespace(openocd_process, has_buggy_whitespace_trim):
+def test_return_with_whitespace(openocd_process, has_return_whitespace_bug):
     with PyOpenocdClient() as ocd:
         out = ocd.raw_cmd("return {  abc 4567 }")
 
-        if has_buggy_whitespace_trim:
+        if has_return_whitespace_bug:
             assert out == "abc 4567"
             pytest.xfail("known OpenOCD whitespace bug")
         else:
             assert out == "  abc 4567 "
+
+
+def test_return_with_newline(openocd_process, has_return_whitespace_bug):
+    with PyOpenocdClient() as ocd:
+        out = ocd.raw_cmd("return \" \\n abc \\n4567 \"")
+
+        if has_return_whitespace_bug:
+            assert out == "abc \n4567"
+            pytest.xfail("known OpenOCD whitespace bug")
+        else:
+            assert out == " \n abc \n4567 "
+
+
+def test_string_concat_with_whitespace(openocd_process):
+    with PyOpenocdClient() as ocd:
+        out = ocd.raw_cmd("string repeat { a } 4")
+        assert out == " a  a  a  a "
+
+
+def test_string_concat_with_newline(openocd_process):
+    with PyOpenocdClient() as ocd:
+        out = ocd.raw_cmd("string repeat \" abc\\n \" 4")
+        assert out == " abc\n  abc\n  abc\n  abc\n "
+
+
+def test_string_concat_with_newline_and_return(openocd_process, has_return_whitespace_bug):
+    with PyOpenocdClient() as ocd:
+        out = ocd.raw_cmd("return [string repeat \" abc\\n \" 4]")
+        if has_return_whitespace_bug:
+            assert out == "abc\n  abc\n  abc\n  abc"
+            pytest.xfail("known OpenOCD whitespace bug")
+        else:
+            assert out == " abc\n  abc\n  abc\n  abc\n "
 
 
 def test_nonexistent_cmd(openocd_process):
@@ -53,6 +86,7 @@ def test_echo_capture(openocd_process):
 def test_echo_capture_whitespace(openocd_process):
     with PyOpenocdClient() as ocd:
         out = ocd.raw_cmd("capture { echo { 123 456 } }")
+        # echo appends \n at the end
         assert out == " 123 456 \n"
 
 
@@ -74,15 +108,20 @@ def test_catch_throw(openocd_process):
         assert int(out) == 22  # error code
 
 
-def _parse_out(out):
-    # "5 some text" -> (5, "some text")
-    parts = out.split(" ", maxsplit=1)
+def _parse_out(out: str) -> tuple[int, str]:
+    # "<5,some text>" -> (5, "some text")
+    assert out.startswith("<")
+    assert out.endswith(">")
+    out = out.removeprefix("<")
+    out = out.removesuffix(">")
+    parts = out.split(",", maxsplit=1)
+    assert len(parts) == 2
     return int(parts[0]), parts[1]
 
 
 def test_catch_output_and_success(openocd_process):
     with PyOpenocdClient() as ocd:
-        cmd = 'set RETCODE [ catch { version } OUT ]; return "$RETCODE $OUT" '
+        cmd = 'set RETCODE [ catch { version } OUT ]; return "<$RETCODE,$OUT>" '
         out = ocd.raw_cmd(cmd)
         retcode, text = _parse_out(out)
 
@@ -90,29 +129,22 @@ def test_catch_output_and_success(openocd_process):
         assert "Open On-Chip Debugger" in text
 
 
-def test_catch_output_and_success_whitespace(
-    openocd_process, has_buggy_whitespace_trim
-):
+def test_catch_output_and_success_whitespace(openocd_process):
     with PyOpenocdClient() as ocd:
         cmd = (
             "set RETCODE [catch { string repeat { a } 4 } OUT]; "
-            'return "$RETCODE $OUT"'
+            'return "<$RETCODE,$OUT>"'
         )
         out = ocd.raw_cmd(cmd)
         retcode, text = _parse_out(out)
 
         assert retcode == 0  # success code
-
-        if has_buggy_whitespace_trim:
-            assert text == " a  a  a  a"
-            pytest.xfail("known OpenOCD whitespace bug")
-        else:
-            assert text == " a  a  a  a "
+        assert text == " a  a  a  a "
 
 
 def test_catch_output_and_error(openocd_process):
     with PyOpenocdClient() as ocd:
-        cmd = 'set RETCODE [ catch { nonexistent_cmd } OUT; ]; return "$RETCODE $OUT" '
+        cmd = 'set RETCODE [ catch { nonexistent_cmd } OUT; ]; return "<$RETCODE,$OUT>" '
         out = ocd.raw_cmd(cmd)
         retcode, text = _parse_out(out)
 
@@ -122,7 +154,7 @@ def test_catch_output_and_error(openocd_process):
 
 def test_catch_output_and_throw(openocd_process):
     with PyOpenocdClient() as ocd:
-        cmd = 'set RETCODE [catch { throw 25 {my msg} } OUT;]; return "$RETCODE $OUT"'
+        cmd = 'set RETCODE [catch { throw 25 {my msg} } OUT;]; return "<$RETCODE,$OUT>"'
         out = ocd.raw_cmd(cmd)
         retcode, text = _parse_out(out)
 
@@ -130,20 +162,16 @@ def test_catch_output_and_throw(openocd_process):
         assert text == "my msg"
 
 
-def test_catch_output_and_throw_whitespace(openocd_process, has_buggy_whitespace_trim):
+def test_catch_output_and_throw_whitespace(openocd_process):
     with PyOpenocdClient() as ocd:
         cmd = (
-            'set RETCODE [catch { throw 25 { my msg  } } OUT;]; return "$RETCODE $OUT"'
+            'set RETCODE [catch { throw 25 { my msg  } } OUT;]; return "<$RETCODE,$OUT>"'
         )
         out = ocd.raw_cmd(cmd)
         retcode, text = _parse_out(out)
 
         assert retcode == 25  # error code
-        if has_buggy_whitespace_trim:
-            assert text == " my msg"
-            pytest.xfail("known OpenOCD whitespace bug")
-        else:
-            assert text == " my msg  "
+        assert text == " my msg  "
 
 
 def test_raw_cmd_timeout_ok(openocd_process):
