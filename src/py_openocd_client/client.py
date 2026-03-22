@@ -234,8 +234,8 @@ class PyOpenocdClient:
             )
             raise OcdInvalidResponseError(msg, raw_cmd, raw_result)
 
-        raw_result = raw_result.removeprefix("<")
-        raw_result = raw_result.removesuffix(">")
+        # Remove leading "<" and trailing ">"
+        raw_result = raw_result[1:-1]
         raw_result_parts = raw_result.split(",", maxsplit=1)
         assert len(raw_result_parts) == 2
 

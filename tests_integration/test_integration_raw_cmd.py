@@ -114,8 +114,7 @@ def _parse_out(out: str) -> tuple[int, str]:
     # "<5,some text>" -> (5, "some text")
     assert out.startswith("<")
     assert out.endswith(">")
-    out = out.removeprefix("<")
-    out = out.removesuffix(">")
+    out = out[1:-1]
     parts = out.split(",", maxsplit=1)
     assert len(parts) == 2
     return int(parts[0]), parts[1]
