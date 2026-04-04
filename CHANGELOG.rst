@@ -7,7 +7,7 @@ Unreleased
 
 * Fix: Proper exception if OpenOCD closes the connection (`#37`_)
 * Diligent handling of socket exceptions (`#38`_)
-* Workaround for excessive whitespace trimming in 'return' in older OpenOCD (`#42`_)
+* Workaround for excessive whitespace trimming in 'return' in older OpenOCD versions (`#42`_)
 
 .. _#37: https://github.com/HonzaMat/PyOpenocdClient/pull/37
 .. _#38: https://github.com/HonzaMat/PyOpenocdClient/pull/38
