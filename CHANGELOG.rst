@@ -11,7 +11,7 @@ Unreleased
 
 .. _#37: https://github.com/HonzaMat/PyOpenocdClient/pull/37
 .. _#38: https://github.com/HonzaMat/PyOpenocdClient/pull/38
-.. _#40: https://github.com/HonzaMat/PyOpenocdClient/pull/42
+.. _#42: https://github.com/HonzaMat/PyOpenocdClient/pull/42
 
 Release 0.1.1 (Oct 06, 2025)
 ----------------------------
