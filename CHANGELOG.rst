@@ -2,8 +2,8 @@
 Changelog for PyOpenocdClient
 =============================
 
-Unreleased
-----------
+Release 0.1.2 (Apr 04, 2026)
+----------------------------
 
 * Fix: Proper exception if OpenOCD closes the connection (`#37`_)
 * Diligent handling of socket exceptions (`#38`_)
