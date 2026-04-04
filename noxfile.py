@@ -120,6 +120,7 @@ def build_doc(session):
         "python3",
         "-m",
         "sphinx",
+        "-a",  # write all files
         "--fail-on-warning",
         "--keep-going",
         ".",
