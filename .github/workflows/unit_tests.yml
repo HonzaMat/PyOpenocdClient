@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '42 20 * * 2,4,6'
 jobs:
-  Run_unit_tests_ubuntu_22_04_py38_and_newer:
+  Run_unit_tests_ubuntu_22_04_py310_and_newer:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out the repository code
@@ -54,6 +54,55 @@ jobs:
         run: |
           python3.7 -m pip install .
           python3.7 -m pytest tests_unit/ -vv
+
+  Run_unit_tests_ubuntu_22_04_py38:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out the repository code
+        uses: actions/checkout@v6
+      - name: Install python interpreter
+        run: |
+          sudo apt-get update
+          sudo add-apt-repository ppa:deadsnakes/ppa
+          sudo apt-get update
+          sudo apt-get install   \
+            python3.8            \
+            python3.8-distutils
+      - name: Install PIP version that still supports Python 3.8
+        run: |
+          python3.7 -m pip install --user pip==25.0.1
+      - name: Install pytest
+        run: |
+          python3.7 -m pip install pytest
+      - name: Run unit testing (on legacy Python 3.8)
+        run: |
+          python3.7 -m pip install .
+          python3.7 -m pytest tests_unit/ -vv
+
+  Run_unit_tests_ubuntu_22_04_py39:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out the repository code
+        uses: actions/checkout@v6
+      - name: Install python interpreter
+        run: |
+          sudo apt-get update
+          sudo add-apt-repository ppa:deadsnakes/ppa
+          sudo apt-get update
+          sudo apt-get install   \
+            python3.9            \
+            python3.9-distutils
+      - name: Install PIP version that still supports Python 3.9
+        run: |
+          python3.9 -m pip install --user pip==26.0.1
+      - name: Install pytest
+        run: |
+          python3.9 -m pip install pytest
+      - name: Run unit testing (on legacy Python 3.9)
+        run: |
+          python3.9 -m pip install .
+          python3.9 -m pytest tests_unit/ -vv
+
   Run_unit_tests_windows_2022:
     runs-on: windows-2022
     steps:
