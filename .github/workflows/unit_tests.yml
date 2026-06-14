@@ -15,10 +15,6 @@ jobs:
           sudo add-apt-repository ppa:deadsnakes/ppa
           sudo apt-get update
           sudo apt-get install   \
-            python3.8            \
-            python3.8-distutils  \
-            python3.9            \
-            python3.9-distutils  \
             python3.11           \
             python3.11-distutils \
             python3.12           \
@@ -70,14 +66,14 @@ jobs:
             python3.8-distutils
       - name: Install PIP version that still supports Python 3.8
         run: |
-          python3.7 -m pip install --user pip==25.0.1
+          python3.8 -m pip install --user pip==25.0.1
       - name: Install pytest
         run: |
-          python3.7 -m pip install pytest
+          python3.8 -m pip install pytest
       - name: Run unit testing (on legacy Python 3.8)
         run: |
-          python3.7 -m pip install .
-          python3.7 -m pytest tests_unit/ -vv
+          python3.8 -m pip install .
+          python3.8 -m pytest tests_unit/ -vv
 
   Run_unit_tests_ubuntu_22_04_py39:
     runs-on: ubuntu-22.04
