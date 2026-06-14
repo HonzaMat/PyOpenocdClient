@@ -27,8 +27,17 @@ jobs:
         run: |
           nox -s tests_unit
 
-  Run_unit_tests_ubuntu_22_04_py37:
+  Run_unit_tests_ubuntu_22_04_legacy_python:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - python: "3.7"
+            pip_version: "23.3.2"
+          - python: "3.8"
+            pip_version: "25.0.1"
+          - python: "3.9"
+            pip_version: "26.0.1"
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v6
@@ -37,67 +46,19 @@ jobs:
           sudo apt-get update
           sudo add-apt-repository ppa:deadsnakes/ppa
           sudo apt-get update
-          sudo apt-get install   \
-            python3.7            \
-            python3.7-distutils
-      - name: Install PIP version that still supports Python 3.7
+          sudo apt-get install \
+            python${{ matrix.python }} \
+            python${{ matrix.python }}-distutils
+      - name: Install PIP version that still supports legacy Python ${{ matrix.python }}
         run: |
-          python3.7 -m pip install --user pip==23.3.2
+          python${{ matrix.python }} -m pip install --user pip==${{ matrix.pip_version }}
       - name: Install pytest
         run: |
-          python3.7 -m pip install pytest
-      - name: Run unit testing (on legacy Python 3.7)
+          python${{ matrix.python }} -m pip install pytest
+      - name: Run unit testing (on legacy Python ${{ matrix.python }})
         run: |
-          python3.7 -m pip install .
-          python3.7 -m pytest tests_unit/ -vv
-
-  Run_unit_tests_ubuntu_22_04_py38:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Check out the repository code
-        uses: actions/checkout@v6
-      - name: Install python interpreter
-        run: |
-          sudo apt-get update
-          sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt-get update
-          sudo apt-get install   \
-            python3.8            \
-            python3.8-distutils
-      - name: Install PIP version that still supports Python 3.8
-        run: |
-          python3.8 -m pip install --user pip==25.0.1
-      - name: Install pytest
-        run: |
-          python3.8 -m pip install pytest
-      - name: Run unit testing (on legacy Python 3.8)
-        run: |
-          python3.8 -m pip install .
-          python3.8 -m pytest tests_unit/ -vv
-
-  Run_unit_tests_ubuntu_22_04_py39:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Check out the repository code
-        uses: actions/checkout@v6
-      - name: Install python interpreter
-        run: |
-          sudo apt-get update
-          sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt-get update
-          sudo apt-get install   \
-            python3.9            \
-            python3.9-distutils
-      - name: Install PIP version that still supports Python 3.9
-        run: |
-          python3.9 -m pip install --user pip==26.0.1
-      - name: Install pytest
-        run: |
-          python3.9 -m pip install pytest
-      - name: Run unit testing (on legacy Python 3.9)
-        run: |
-          python3.9 -m pip install .
-          python3.9 -m pytest tests_unit/ -vv
+          python${{ matrix.python }} -m pip install .
+          python${{ matrix.python }} -m pytest tests_unit/ -vv
 
   Run_unit_tests_windows_2022:
     runs-on: windows-2022
