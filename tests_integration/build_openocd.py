@@ -24,7 +24,7 @@ NPROC = min(multiprocessing.cpu_count(), 8)
 initial_work_dir = Path(os.getcwd()).resolve()
 
 
-def print_flush(s: str) -> None:
+def print_flush(s: str = "") -> None:
     print(s, flush=True)
 
 
@@ -72,6 +72,7 @@ def run_cmd(
 ) -> None:
     print_flush()
     print_flush(f"Running command: {repr(cmd)} (work dir: {cwd})")
+    print_flush()
     subprocess.check_call(cmd, cwd=cwd, env=env)
 
 
@@ -85,7 +86,6 @@ def print_tool_versions() -> None:
     ]
 
     for cmd in cmds:
-        print_flush()
         run_cmd(cmd)
 
 
