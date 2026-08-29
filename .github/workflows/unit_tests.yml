@@ -37,7 +37,7 @@ jobs:
         run: |
           python3 --version
           python3 -m pip install --user nox
-          python3 -m nox -s tests_unit-3.10 tests_unit-3.11 tests_unit-3.12 tests_unit-3.13 tests_unit-3.14
+          python3 -m nox -s tests_unit
 
   Check_coverage:
     runs-on: ubuntu-22.04
