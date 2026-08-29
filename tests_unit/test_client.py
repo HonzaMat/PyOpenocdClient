@@ -6,6 +6,7 @@ import pytest
 
 from py_openocd_client import (
     OcdCommandFailedError,
+    OcdEmptyResponseError,
     OcdInvalidResponseError,
     PyOpenocdClient,
 )
@@ -222,18 +223,6 @@ def test_cmd_negative_retcode(baseclient_inst_mock):
 def test_cmd_invalid_responses(baseclient_inst_mock):
     ocd = PyOpenocdClient()
 
-    baseclient_inst_mock.raw_cmd.return_value = ""
-    with pytest.raises(OcdInvalidResponseError) as e:
-        ocd.cmd("some_cmd")
-
-    expected_raw_cmd = (
-        "set CMD_RETCODE [ "
-        "catch { some_cmd } CMD_OUTPUT ] ; "
-        'return "<$CMD_RETCODE,$CMD_OUTPUT>" ; '
-    )
-    assert e.value.raw_cmd == expected_raw_cmd
-    assert e.value.out == ""
-
     baseclient_inst_mock.raw_cmd.return_value = "a"
     with pytest.raises(OcdInvalidResponseError):
         ocd.cmd("some_cmd")
@@ -266,5 +255,26 @@ def test_cmd_invalid_responses(baseclient_inst_mock):
     with pytest.raises(OcdInvalidResponseError) as e:
         ocd.cmd("some_cmd")
 
+    expected_raw_cmd = (
+        "set CMD_RETCODE [ "
+        "catch { some_cmd } CMD_OUTPUT ] ; "
+        'return "<$CMD_RETCODE,$CMD_OUTPUT>" ; '
+    )
     assert e.value.raw_cmd == expected_raw_cmd
-    assert e.value.out == "56a some output"
+    assert e.value.raw_out == "56a some output"
+
+
+def test_cmd_empty_response(baseclient_inst_mock):
+    ocd = PyOpenocdClient()
+
+    baseclient_inst_mock.raw_cmd.return_value = ""
+    with pytest.raises(OcdEmptyResponseError) as e:
+        ocd.cmd("cmd_with_empty_response")
+
+    expected_raw_cmd = (
+        "set CMD_RETCODE [ "
+        "catch { cmd_with_empty_response } CMD_OUTPUT ] ; "
+        'return "<$CMD_RETCODE,$CMD_OUTPUT>" ; '
+    )
+    assert e.value.raw_cmd == expected_raw_cmd
+    assert e.value.raw_out == ""
