@@ -28,8 +28,8 @@ jobs:
         run: |
           nox -s tests_unit
 
-  Run_unit_tests_windows_2022:
-    runs-on: windows-2022
+  Run_unit_tests_windows_2025:
+    runs-on: windows-2025
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v6
@@ -37,8 +37,13 @@ jobs:
         run: |
           python3 --version
           python3 -m pip install --user nox
-          python3 -m nox -s tests_unit
-
+          python3 -m nox -s   \
+              tests_unit-3.10 \
+              tests_unit-3.11 \
+              tests_unit-3.12 \
+              tests_unit-3.13 \
+              tests_unit-3.14 \
+              tests_unit-3.15
   Check_coverage:
     runs-on: ubuntu-22.04
     steps:
