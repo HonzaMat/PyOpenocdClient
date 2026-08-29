@@ -196,7 +196,9 @@ def _check_openocd_terminated(openocd_process, expected_exit_status):
         openocd_process.poll() is not None
     ), "OpenOCD process did not terminate after shutdown command"
 
-    assert openocd_process.poll() == expected_exit_status, "OpenOCD terminated with unexpected exit status"
+    assert (
+        openocd_process.poll() == expected_exit_status
+    ), "OpenOCD terminated with unexpected exit status"
 
 
 @pytest.mark.parametrize("exit_code", [0, 1])
@@ -225,4 +227,3 @@ def test_shutdown_arbitrary_code(openocd_process, shutdown_supports_any_exit_sta
             assert ocd.is_connected()
             ocd.cmd("version")
             assert ocd.is_connected()
-

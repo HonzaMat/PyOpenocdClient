@@ -685,7 +685,7 @@ class PyOpenocdClient:
         """
         self.disconnect()
 
-    def shutdown(self, exit_code=0) -> None:
+    def shutdown(self, exit_code: int = 0) -> None:
         """
         Shut down (terminate) the OpenOCD process by sending the ``shutdown``
         command to it. PyOpenocdClient also immediately disconnects from OpenOCD.
