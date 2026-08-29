@@ -188,13 +188,42 @@ def test_exit(openocd_process):
         assert not ocd.is_connected()
 
 
-def test_shutdown(openocd_process):
-    with PyOpenocdClient() as ocd:
-        ocd.shutdown()
-        assert not ocd.is_connected()
+def _check_openocd_terminated(openocd_process, expected_exit_status):
+    # Give OpenOCD some time to exit - avoid races.
+    time.sleep(1.0)
 
-        # Give OpenOCD time to exit - avoid races
-        time.sleep(1.0)
-        assert (
-            openocd_process.poll() is not None
-        ), "OpenOCD process did not terminate after shutdown command"
+    assert (
+        openocd_process.poll() is not None
+    ), "OpenOCD process did not terminate after shutdown command"
+
+    assert (
+        openocd_process.poll() == expected_exit_status
+    ), "OpenOCD terminated with unexpected exit status"
+
+
+@pytest.mark.parametrize("exit_code", [0, 1])
+def test_shutdown(openocd_process, exit_code):
+    # Exit code 0 or 1 is supported by all OpenOCD versions.
+    with PyOpenocdClient() as ocd:
+        ocd.shutdown(exit_code)
+        assert not ocd.is_connected()
+        _check_openocd_terminated(openocd_process, exit_code)
+
+
+def test_shutdown_arbitrary_code(openocd_process, shutdown_supports_any_exit_status):
+    # Arbitrary exit code is only supported by newer OpenOCD.
+    with PyOpenocdClient() as ocd:
+
+        if shutdown_supports_any_exit_status:
+            ocd.shutdown(124)
+            assert not ocd.is_connected()
+            _check_openocd_terminated(openocd_process, 124)
+        else:
+            with pytest.raises(ValueError) as e:
+                ocd.shutdown(124)
+            assert "supports exit code 0 or 1 only" in str(e.value)
+
+            # We must remain connected, commands must still work
+            assert ocd.is_connected()
+            ocd.cmd("version")
+            assert ocd.is_connected()

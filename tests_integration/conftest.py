@@ -97,6 +97,18 @@ def has_return_whitespace_bug(openocd_version):
     ]
 
 
+@pytest.fixture
+def shutdown_supports_any_exit_status(openocd_version):
+    """
+    Say if the OpenOCD version being tested supports arbitrary exit code
+    with the "shutdown" command.
+
+    This capability was intrduced in commit "ca1a5e98",
+    https://review.openocd.org/c/openocd/+/9381.
+    """
+    return openocd_version.startswith("vanilla-master")
+
+
 def pytest_sessionstart(session):
     if _is_tcp_port_open(TCL_PORT_NUM):
         raise RuntimeError(

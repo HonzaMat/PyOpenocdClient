@@ -451,11 +451,24 @@ def test_exit(ocd):
     ocd.cmd.assert_not_called()
 
 
-def test_shutdown(ocd):
+@pytest.mark.parametrize(
+    ("exit_status", "expected_command"),
+    [(0, "shutdown"), (1, "shutdown error")],
+)
+def test_shutdown(ocd, exit_status, expected_command):
     ocd.disconnect = mock.Mock()
-    ocd.shutdown()
-    ocd.cmd.assert_called_once_with("shutdown")
+    ocd.shutdown(exit_status)
+    ocd.cmd.assert_called_once_with(expected_command)
     ocd.disconnect.assert_called_once()
+
+
+def test_shutdown_out_of_range(ocd):
+    ocd.disconnect = mock.Mock()
+    with pytest.raises(ValueError) as e:
+        ocd.shutdown(1234)
+    assert "must be in range 0..255" in str(e.value)
+    ocd.cmd.assert_not_called()
+    ocd.disconnect.assert_not_called()
 
 
 def test_shutdown_tolerates_nonzero_return(ocd):
@@ -476,3 +489,37 @@ def test_shutdown_tolerates_empty_response(ocd):
     ocd.shutdown()
     ocd.cmd.assert_called_once_with("shutdown")
     ocd.disconnect.assert_called_once()
+
+
+def test_shutdown_exit_code_support_detection(ocd):
+    ocd.cmd.return_value = _prepare_command_result(
+        "shutdown ['error'|exit_code]\n  blah blah"
+    )
+    assert ocd._shutdown_supports_any_exit_code()
+    ocd.cmd.assert_called_once_with("help shutdown")
+    ocd.cmd.reset_mock()
+
+    ocd.cmd.return_value = _prepare_command_result("shutdown ['error']\n  blah blah")
+    assert not ocd._shutdown_supports_any_exit_code()
+    ocd.cmd.assert_called_once_with("help shutdown")
+    ocd.cmd.reset_mock()
+
+
+def test_shutdown_arbitrary_code_supported(ocd):
+    ocd.disconnect = mock.Mock()
+    ocd._shutdown_supports_any_exit_code = mock.Mock()
+    ocd._shutdown_supports_any_exit_code.return_value = True
+    ocd.shutdown(68)
+    ocd.cmd.assert_called_once_with("shutdown 68")
+    ocd.disconnect.assert_called_once()
+
+
+def test_shutdown_arbitrary_code_unsupported(ocd):
+    ocd.disconnect = mock.Mock()
+    ocd._shutdown_supports_any_exit_code = mock.Mock()
+    ocd._shutdown_supports_any_exit_code.return_value = False
+    with pytest.raises(ValueError) as e:
+        ocd.shutdown(68)
+    assert "supports exit code 0 or 1 only" in str(e.value)
+    ocd.cmd.assert_not_called()
+    ocd.disconnect.assert_not_called()
