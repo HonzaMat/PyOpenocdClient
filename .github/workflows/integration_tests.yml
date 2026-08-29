@@ -44,7 +44,8 @@ jobs:
 
       - name: Download OpenOCD
         run: |
-          Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.12.0-7/xpack-openocd-0.12.0-7-win32-x64.zip" -OutFile "openocd.zip"
+          Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.12.0-6/xpack-openocd-0.12.0-6-win32-x64.zip" -OutFile "openocd.zip"
+
 
       - name: Unzip OpenOCD
         run: |
@@ -57,6 +58,6 @@ jobs:
       - name: Run integration testing
         run: |
           dir
-          python3 -m nox -s tests_integration -- --openocd-path xpack-openocd-0.12.0-7\\bin\\openocd --openocd-version vanilla-master-libjim-internal
+          python3 -m nox -s tests_integration -- --openocd-path xpack-openocd-0.12.0-6\\bin\\openocd --openocd-version vanilla-master-libjim-internal
 
 
