@@ -181,7 +181,9 @@ def main() -> int:
     openocd_version = parse_args()
 
     print_flush()
-    print_flush(f"Will check-out and build this OpenOCD version: {openocd_version.name}")
+    print_flush(
+        f"Will check-out and build this OpenOCD version: {openocd_version.name}"
+    )
 
     print_tool_versions()
     prepare_libjim(openocd_version)

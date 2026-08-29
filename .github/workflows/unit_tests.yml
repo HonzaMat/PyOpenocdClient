@@ -4,8 +4,8 @@ on:
   schedule:
     - cron: '42 20 * * 2,4,6'
 jobs:
-  Run_unit_tests_ubuntu_22_04:
-    runs-on: ubuntu-22.04
+  Run_unit_tests_ubuntu_26_04:
+    runs-on: ubuntu-26.04
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v6
@@ -28,8 +28,8 @@ jobs:
         run: |
           nox -s tests_unit
 
-  Run_unit_tests_windows_2022:
-    runs-on: windows-2022
+  Run_unit_tests_windows_2025:
+    runs-on: windows-2025
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v6
@@ -44,7 +44,7 @@ jobs:
               tests_unit-3.13 `
               tests_unit-3.14
   Check_coverage:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v6
