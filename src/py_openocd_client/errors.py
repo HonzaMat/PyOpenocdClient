@@ -108,17 +108,15 @@ class OcdInvalidResponseError(OcdBaseException):
         (that could not be understood or parsed).
 
         .. versionadded:: 0.2.0
-           Added in version 0.2.0.
         """
         return self._raw_out
 
     @property
     def out(self) -> str:
         """
-        Deprecated alias for `raw_out`, kept just for compatibility.
+        Deprecated alias for ``raw_out``, kept just for compatibility.
 
         .. deprecated:: 0.2.0
-           Please use `raw_out` instead.
         """
         warnings.warn(
             "OcdInvalidResponseError.out is deprecated. "
@@ -138,7 +136,6 @@ class OcdEmptyResponseError(OcdInvalidResponseError):
     unexpected and would mean that OpenOCD mis-behaves.
 
     .. versionadded:: 0.2.0
-       Added in version 0.2.0.
     """
 
     pass

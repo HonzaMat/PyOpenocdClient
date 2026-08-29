@@ -2,7 +2,11 @@
 
 import pytest
 
-from py_openocd_client import OcdCommandFailedError, OcdCommandResult, OcdInvalidResponseError
+from py_openocd_client import (
+    OcdCommandFailedError,
+    OcdCommandResult,
+    OcdInvalidResponseError,
+)
 
 
 def test_ocd_command_error_to_string():
