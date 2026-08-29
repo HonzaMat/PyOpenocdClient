@@ -107,6 +107,19 @@ class OcdInvalidResponseError(OcdBaseException):
         return self._out
 
 
+class OcdEmptyResponseError(OcdInvalidResponseError):
+    """
+    Exception which denotes that a TCL command produced an empty response.
+    It is a sub-class of :py:class:`py_openocd_client.OcdInvalidResponseError`.
+
+    Empty responses occur for commands ``exit`` and ``shutdown``, that is, commands
+    that immediately terminate the session. For other commands, empty responses are
+    un-expected and mean that OpenOCD mis-behaves.
+    """
+
+    pass
+
+
 class OcdConnectionError(OcdBaseException):
     """
     Exception that denotes connection errors, for instance:

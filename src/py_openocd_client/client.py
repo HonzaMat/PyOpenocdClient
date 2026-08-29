@@ -7,7 +7,12 @@ from typing import Any, List, Optional, Tuple, Type
 
 from .baseclient import _PyOpenocdBaseClient
 from .bp_parser import _BpParser
-from .errors import OcdCommandFailedError, OcdInvalidResponseError, _OcdParsingError
+from .errors import (
+    OcdCommandFailedError,
+    OcdInvalidResponseError,
+    OcdEmptyResponseError,
+    _OcdParsingError,
+)
 from .types import BpInfo, OcdCommandResult, WpInfo, WpType
 from .wp_parser import _WpParser
 
@@ -226,6 +231,14 @@ class PyOpenocdClient:
                 and s.endswith(">")
                 and re.match(r"^<-?\d+,", s) is not None
             )
+
+        if len(raw_result) == 0:
+            msg = (
+                "Received empty response from OpenOCD. "
+                "(This is OK for 'shutdown' or 'exit' commands but unexpected "
+                "for any other command.) "
+            )
+            raise OcdEmptyResponseError(msg, raw_cmd, raw_result)
 
         if not is_expected_raw_result(raw_result):
             msg = (
@@ -688,12 +701,16 @@ class PyOpenocdClient:
         #   The "shutdown" command immediately ends the TCL processing and
         #   an empty response is sent back to the TCL client.
 
-        # For the above reasons, send the shutdown command via raw_cmd() and:
-        # - don't wrap "shutdown" into any other TCL commands,
-        # - don't expect any particular response.
-        self.raw_cmd("shutdown")
-
-        self.disconnect()
+        try:
+            self.cmd("shutdown")
+        except OcdCommandFailedError:
+            # This is OK and expected for OpenOCD 0.12.0 and older
+            pass
+        except OcdEmptyResponseError:
+            # This is OK and expected for OpenOCD 0.13.0-dev and newer
+            pass
+        finally:
+            self.disconnect()
 
     def raw_cmd(self, raw_cmd: str, timeout: Optional[float] = None) -> str:
         """
