@@ -74,7 +74,7 @@ def print_tool_versions() -> None:
     cmds = [
         ["autoconf", "--version"],
         ["automake", "--version"],
-        ["libtool", "--version"],
+        ["libtoolize", "--version"],
         ["pkg-config", "--version"],
         ["gcc", "--version"],
     ]
