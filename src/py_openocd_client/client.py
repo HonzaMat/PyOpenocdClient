@@ -694,10 +694,9 @@ class PyOpenocdClient:
         command to it. PyOpenocdClient also immediately disconnects from OpenOCD.
 
         The optional argument ``exit_code`` allows to set the exit code
-        (exit status) of the OpenOCD process. If omitted, the exit code
-        will be 0 (success).
+        of the OpenOCD process. Default is 0 (success).
 
-        .. versionadded:: 0.2.0::
+        .. versionadded:: 0.2.0
            Argument ``exit_code``.
         """
         if not (0 <= exit_code <= 255):
