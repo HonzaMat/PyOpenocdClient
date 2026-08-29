@@ -5,7 +5,7 @@ on:
     - cron: '42 20 * * 2,4,6'
 jobs:
   code_quality:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v6
