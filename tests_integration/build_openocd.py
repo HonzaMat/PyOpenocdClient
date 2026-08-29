@@ -24,6 +24,10 @@ NPROC = min(multiprocessing.cpu_count(), 8)
 initial_work_dir = Path(os.getcwd()).resolve()
 
 
+def print_flush(s: str = "") -> None:
+    print(s, flush=True)
+
+
 def get_script_dir() -> Path:
     """Return path to the script directory."""
     return Path(__file__).resolve().parent
@@ -66,8 +70,23 @@ def recreate_dir(d: Path) -> None:
 def run_cmd(
     cmd: list[str], cwd: Path | None = None, env: dict[str, str] | None = None
 ) -> None:
-    print(f"Running command: {repr(cmd)} (work dir: {cwd})")
+    print_flush()
+    print_flush(f"Running command: {repr(cmd)} (work dir: {cwd})")
+    print_flush()
     subprocess.check_call(cmd, cwd=cwd, env=env)
+
+
+def print_tool_versions() -> None:
+    cmds = [
+        ["autoconf", "--version"],
+        ["automake", "--version"],
+        ["libtoolize", "--version"],
+        ["pkg-config", "--version"],
+        ["gcc", "--version"],
+    ]
+
+    for cmd in cmds:
+        run_cmd(cmd)
 
 
 def git_show_current_commit(cwd: Path) -> None:
@@ -153,14 +172,20 @@ def check_build(version: OpenOcdVersion) -> None:
 
     run_cmd([str(openocd_bin), "--version"])
 
-    print()
-    print(f'OpenOCD "{version.name}" successfully built!')
-    print(f"Path to the OpenOCD binary: {str(openocd_bin)}")
+    print_flush()
+    print_flush(f'OpenOCD "{version.name}" successfully built!')
+    print_flush(f"Path to the OpenOCD binary: {str(openocd_bin)}")
 
 
 def main() -> int:
     openocd_version = parse_args()
 
+    print_flush()
+    print_flush(
+        f"Will check-out and build this OpenOCD version: {openocd_version.name}"
+    )
+
+    print_tool_versions()
     prepare_libjim(openocd_version)
     checkout_and_build_openocd(openocd_version)
     check_build(openocd_version)

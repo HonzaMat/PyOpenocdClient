@@ -112,7 +112,7 @@ def tests_integration(session):
     )
 
 
-@nox.session
+@nox.session(python=["3.14"])
 def build_doc(session):
     session.install("-r", "requirements_doc.txt")
     session.chdir("doc")

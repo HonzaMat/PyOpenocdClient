@@ -70,7 +70,8 @@ OPENOCD_VERSIONS = [
         name="vanilla-0.12.0",
         repo=REPO_OPENOCD_VANILLA,
         git_rev="v0.12.0",
-        extra_cflags="",
+        # Older OpenOCD code has compilation warnings on new GCC
+        extra_cflags="-Wno-error",
         extra_configure_args=[],
         libjim=LIBJIM_INTERNAL,
     ),
@@ -110,7 +111,8 @@ OPENOCD_VERSIONS = [
         name="riscv-master-libjim-from-apt",
         repo=REPO_OPENOCD_RISCV,
         git_rev="riscv",
-        extra_cflags="",
+        # Older OpenOCD code has compilation warnings on new GCC
+        extra_cflags="-Wno-error",
         extra_configure_args=[],
         libjim=LIBJIM_FROM_APT,
     ),

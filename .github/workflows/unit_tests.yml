@@ -4,23 +4,28 @@ on:
   schedule:
     - cron: '42 20 * * 2,4,6'
 jobs:
-  Run_unit_tests_ubuntu_22_04:
-    runs-on: ubuntu-22.04
+  Run_unit_tests_ubuntu_26_04:
+    runs-on: ubuntu-26.04
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v6
-      - name: Install python interpreters
-        run: |
-          sudo apt-get update
-          sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt-get update
-          sudo apt-get install   \
-            python3.11           \
-            python3.11-distutils \
-            python3.12           \
-            python3.13           \
-            python3.14           \
-            python3.15
+      # - name: Install python interpreters
+      #   run: |
+      #     sudo apt-get update
+      #     sudo add-apt-repository -y ppa:deadsnakes/ppa
+      #     sudo apt-get update
+      #     sudo apt-get install -y \
+      #       python3.13            \
+      #       python3.15
+      - name: Set up python interpreters
+        uses: actions/setup-python@v7
+        with:
+          python-version: |
+            3.10
+            3.11
+            3.12
+            3.13
+            3.15.0-rc.1
       - name: Install nox
         run: |
           python3 -m pip install --user nox
@@ -28,8 +33,8 @@ jobs:
         run: |
           nox -s tests_unit
 
-  Run_unit_tests_windows_2022:
-    runs-on: windows-2022
+  Run_unit_tests_windows_2025:
+    runs-on: windows-2025
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v6
@@ -44,7 +49,7 @@ jobs:
               tests_unit-3.13 `
               tests_unit-3.14
   Check_coverage:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v6
