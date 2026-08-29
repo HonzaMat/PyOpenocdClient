@@ -81,7 +81,8 @@ def tests_unit(session):
         "-vv",
         "-W",
         "Warning",
-        *session.posargs)
+        *session.posargs,
+    )
 
 
 @nox.session

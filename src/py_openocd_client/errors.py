@@ -123,7 +123,7 @@ class OcdInvalidResponseError(OcdBaseException):
         warnings.warn(
             "OcdInvalidResponseError.out is deprecated. "
             "Please use OcdInvalidResponseError.raw_out instead.",
-            DeprecationWarning
+            DeprecationWarning,
         )
         return self._raw_out
 
