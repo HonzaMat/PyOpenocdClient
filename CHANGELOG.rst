@@ -9,9 +9,11 @@ Unreleased
 * Create new exception `OcdEmptyResponseError`. (`#49`_)
 * Improve `shutdown()` method to better check the "shutdown" command result. (`#49`_)
 * Deprecate property `OcdInvalidResponseError.out`. (`#49`_)
+* Add argument `exit_status` to `shutdown()` method. (`#51`_)
 
 .. _#46: https://github.com/HonzaMat/PyOpenocdClient/pull/46
 .. _#49: https://github.com/HonzaMat/PyOpenocdClient/pull/49
+.. _#51: https://github.com/HonzaMat/PyOpenocdClient/pull/51
 
 Release 0.1.2 (Apr 04, 2026)
 ----------------------------
