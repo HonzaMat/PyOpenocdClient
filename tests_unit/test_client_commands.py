@@ -114,13 +114,13 @@ def test_get_reg_error(ocd):
     with pytest.raises(OcdInvalidResponseError) as e:
         ocd.get_reg("ra")
     assert e.value.raw_cmd == "raw_cmd_placeholder"
-    assert e.value.out == "0xKLM"
+    assert e.value.raw_out == "0xKLM"
 
     ocd.cmd.return_value = _prepare_command_result("0x1234 0x5678")
     with pytest.raises(OcdInvalidResponseError) as e:
         ocd.get_reg("pc")
     assert e.value.raw_cmd == "raw_cmd_placeholder"
-    assert e.value.out == "0x1234 0x5678"
+    assert e.value.raw_out == "0x1234 0x5678"
 
 
 def test_set_reg(ocd):
@@ -242,7 +242,7 @@ def test_read_memory_response_errors(ocd):
 
     assert "different number of values than requested" in str(e)
     assert e.value.raw_cmd == "raw_cmd_placeholder"
-    assert e.value.out == "0x1111 0x2222 0x3333"
+    assert e.value.raw_out == "0x1111 0x2222 0x3333"
 
     # Pretend that we received an invalid number
     ocd.cmd.return_value = _prepare_command_result("0x1111 0xKLM")
@@ -251,7 +251,7 @@ def test_read_memory_response_errors(ocd):
 
     assert "not a valid hexadecimal number" in str(e)
     assert e.value.raw_cmd == "raw_cmd_placeholder"
-    assert e.value.out == "0x1111 0xKLM"
+    assert e.value.raw_out == "0x1111 0xKLM"
 
 
 def test_list_bp_empty(ocd):
@@ -288,7 +288,7 @@ def test_list_bp_invalid_response(ocd):
     ocd.cmd.assert_called_once_with("bp")
 
     assert e.value.raw_cmd == "raw_cmd_placeholder"
-    assert e.value.out == bp_command_output
+    assert e.value.raw_out == bp_command_output
 
 
 def test_add_bp(ocd):
@@ -355,7 +355,7 @@ def test_list_wp_invalid_response(ocd):
     ocd.cmd.assert_called_once_with("wp")
 
     assert e.value.raw_cmd == "raw_cmd_placeholder"
-    assert e.value.out == wp_command_output
+    assert e.value.raw_out == wp_command_output
 
 
 def test_add_wp(ocd):
@@ -421,7 +421,7 @@ def test_version_tuple_error(ocd):
         ocd.version_tuple()
     assert "Unable to parse the version string received from OpenOCD" in str(e)
     assert e.value.raw_cmd == "raw_cmd_placeholder"
-    assert e.value.out == version_str
+    assert e.value.raw_out == version_str
 
 
 def test_target_names(ocd):
