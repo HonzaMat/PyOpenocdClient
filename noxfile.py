@@ -80,7 +80,7 @@ def tests_unit(session):
         "tests_unit/",
         "-vv",
         "-W",
-        "Warning",
+        "error",
         *session.posargs,
     )
 
@@ -123,7 +123,7 @@ def tests_integration(session):
         "tests_integration/",
         "-vv",
         "-W",
-        "Warning",
+        "error",
         *session.posargs,
     )
 

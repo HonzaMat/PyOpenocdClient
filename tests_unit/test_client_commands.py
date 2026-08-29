@@ -460,7 +460,7 @@ def test_shutdown(ocd):
 
 def test_shutdown_tolerates_nonzero_return(ocd):
     ocd.disconnect = mock.Mock()
-    cmd_result = OcdCommandResult(4, "exit", "...", "dummy output")
+    cmd_result = OcdCommandResult(4, "shutdown", "...", "some dummy output")
     ocd.cmd.recv.side_effect = [OcdCommandFailedError(cmd_result)]
     ocd.shutdown()
     ocd.cmd.assert_called_once_with("shutdown")
@@ -470,7 +470,7 @@ def test_shutdown_tolerates_nonzero_return(ocd):
 def test_shutdown_tolerates_empty_response(ocd):
     ocd.disconnect = mock.Mock()
     cmd_error = OcdEmptyResponseError(
-        "OpenOCD sent an unexpected empty response",
+        "Received an unexpected empty response from OpenOCD",
         "...",
         "")
     ocd.cmd.recv.side_effect = [cmd_error]
