@@ -9,8 +9,8 @@ from .baseclient import _PyOpenocdBaseClient
 from .bp_parser import _BpParser
 from .errors import (
     OcdCommandFailedError,
-    OcdInvalidResponseError,
     OcdEmptyResponseError,
+    OcdInvalidResponseError,
     _OcdParsingError,
 )
 from .types import BpInfo, OcdCommandResult, WpInfo, WpType
