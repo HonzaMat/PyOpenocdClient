@@ -685,11 +685,31 @@ class PyOpenocdClient:
         """
         self.disconnect()
 
-    def shutdown(self) -> None:
+    def shutdown(self, exit_status=0) -> None:
         """
-        Shut down the OpenOCD process by sending the ``shutdown`` command to it.
-        PyOpenocdClient also gets immediately disconnected from OpenOCD.
+        Shut down (terminate) the OpenOCD process by sending the ``shutdown``
+        command to it. PyOpenocdClient also immediately disconnects from OpenOCD.
+
+        The optional argument ``exit_status`` allows to set the exit status
+        (exit code) of the OpenOCD process. If omitted, the exit status
+        will be 0 (success).
+
+        .. versionadded:: 0.2.0::
+           Argument ``exit_status``.
         """
+        if not (0 <= exit_status <= 255):
+            raise ValueError("The exit_status must be in range 0..255.")
+
+        # For compatibility with older OpenOCD, prefer:
+        # - "shutdown" over "shutdown 0"
+        # - "shutdown error" over "shutdown 1"
+        if exit_status == 0:
+            cmd = "shutdown"
+        elif exit_status == 1:
+            cmd = "shutdown error"
+        else:
+            cmd = f"shutdown {exit_status}"
+
         # Different OpenOCD versions respond to "shutdown" command differently:
         #
         # - OpenOCD 0.12.0 and older:
@@ -703,7 +723,7 @@ class PyOpenocdClient:
 
         # Tolerate both the above scenarios:
         try:
-            self.cmd("shutdown")
+            self.cmd(cmd)
         except OcdCommandFailedError:
             pass
         except OcdEmptyResponseError:

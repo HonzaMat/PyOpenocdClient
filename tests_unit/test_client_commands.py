@@ -451,11 +451,30 @@ def test_exit(ocd):
     ocd.cmd.assert_not_called()
 
 
-def test_shutdown(ocd):
+@pytest.mark.parametrize(
+    ("exit_status", "expected_command"),
+    [
+        (0, "shutdown"),
+        (1, "shutdown error"),
+        (68, "shutdown 68"),
+    ],
+)
+def test_shutdown(ocd, exit_status, expected_command):
     ocd.disconnect = mock.Mock()
-    ocd.shutdown()
-    ocd.cmd.assert_called_once_with("shutdown")
+
+    ocd.shutdown(exit_status)
+
+    ocd.cmd.assert_called_once_with(expected_command)
     ocd.disconnect.assert_called_once()
+
+
+def test_shutdown_out_of_range(ocd):
+    ocd.disconnect = mock.Mock()
+    with pytest.raises(ValueError) as e:
+        ocd.shutdown(1234)
+    assert "must be in range 0..255" in str(e.value)
+    ocd.cmd.assert_not_called()
+    ocd.disconnect.assert_not_called()
 
 
 def test_shutdown_tolerates_nonzero_return(ocd):
