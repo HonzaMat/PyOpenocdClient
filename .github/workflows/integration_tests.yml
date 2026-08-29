@@ -58,6 +58,6 @@ jobs:
       - name: Run integration testing
         run: |
           dir
-          python3 -m nox -s tests_integration -- --openocd-path xpack-openocd-0.12.0-6\\bin\\openocd --openocd-version vanilla-master-libjim-internal
+          python3 -m nox -s tests_integration -- --openocd-path xpack-openocd-0.12.0-6\\bin\\openocd --openocd-version vanilla-0.12.0
 
 
