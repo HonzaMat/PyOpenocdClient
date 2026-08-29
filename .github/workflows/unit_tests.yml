@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '42 20 * * 2,4,6'
 jobs:
-  Run_unit_tests_ubuntu_22_04_py310_and_newer:
+  Run_unit_tests_ubuntu_22_04:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out the repository code
@@ -28,39 +28,6 @@ jobs:
         run: |
           nox -s tests_unit
 
-  Run_unit_tests_ubuntu_22_04_legacy_python:
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        include:
-          - python: "3.7"
-            pip_version: "23.3.2"
-          - python: "3.8"
-            pip_version: "25.0.1"
-          - python: "3.9"
-            pip_version: "26.0.1"
-    steps:
-      - name: Check out the repository code
-        uses: actions/checkout@v6
-      - name: Install python interpreter
-        run: |
-          sudo apt-get update
-          sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt-get update
-          sudo apt-get install \
-            python${{ matrix.python }} \
-            python${{ matrix.python }}-distutils
-      - name: Install PIP version that still supports legacy Python ${{ matrix.python }}
-        run: |
-          python${{ matrix.python }} -m pip install --user pip==${{ matrix.pip_version }}
-      - name: Install pytest
-        run: |
-          python${{ matrix.python }} -m pip install pytest
-      - name: Run unit testing (on legacy Python ${{ matrix.python }})
-        run: |
-          python${{ matrix.python }} -m pip install .
-          python${{ matrix.python }} -m pytest tests_unit/ -vv
-
   Run_unit_tests_windows_2022:
     runs-on: windows-2022
     steps:
@@ -70,8 +37,12 @@ jobs:
         run: |
           python3 --version
           python3 -m pip install --user nox
-          python3 -m nox -s tests_unit-3.10 tests_unit-3.11 tests_unit-3.12 tests_unit-3.13 tests_unit-3.14
-
+          python3 -m nox -s   `
+              tests_unit-3.10 `
+              tests_unit-3.11 `
+              tests_unit-3.12 `
+              tests_unit-3.13 `
+              tests_unit-3.14
   Check_coverage:
     runs-on: ubuntu-22.04
     steps:
