@@ -70,6 +70,20 @@ def run_cmd(
     subprocess.check_call(cmd, cwd=cwd, env=env)
 
 
+def print_tool_versions() -> None:
+    cmds = [
+        ["autoconf", "--version"],
+        ["automake", "--version"],
+        ["libtool", "--version"],
+        ["pkg-config", "--version"],
+        ["gcc", "--version"],
+    ]
+
+    for cmd in cmds:
+        print()
+        run_cmd(cmd)
+
+
 def git_show_current_commit(cwd: Path) -> None:
     assert cwd.is_dir()
     run_cmd(["git", "--no-pager", "show", "--no-patch"], cwd=cwd)
@@ -160,6 +174,10 @@ def check_build(version: OpenOcdVersion) -> None:
 
 def main() -> int:
     openocd_version = parse_args()
+
+    print()
+    print(f"Will check-out and build this OpenOCD version: {openocd_version.name}")
+
 
     prepare_libjim(openocd_version)
     checkout_and_build_openocd(openocd_version)
