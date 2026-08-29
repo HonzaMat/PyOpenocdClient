@@ -89,9 +89,9 @@ class OcdInvalidResponseError(OcdBaseException):
     That is, PyOpenocdClient could not parse and/or interpret that command output.
     """
 
-    def __init__(self, msg: str, raw_cmd: str, out: str):
+    def __init__(self, msg: str, raw_cmd: str, raw_out: str):
         self._raw_cmd = raw_cmd
-        self._raw_out = out
+        self._raw_out = raw_out
         super().__init__(msg)
 
     @property

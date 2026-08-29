@@ -7,7 +7,9 @@ import pytest
 from py_openocd_client import (
     BpInfo,
     BpType,
+    OcdCommandFailedError,
     OcdCommandResult,
+    OcdEmptyResponseError,
     OcdInvalidResponseError,
     PyOpenocdClient,
     WpInfo,
@@ -451,8 +453,27 @@ def test_exit(ocd):
 
 def test_shutdown(ocd):
     ocd.disconnect = mock.Mock()
-    ocd.raw_cmd = mock.Mock()
     ocd.shutdown()
     ocd.cmd.assert_called_once_with("shutdown")
-    ocd.raw_cmd.assert_called_once()
+    ocd.disconnect.assert_called_once()
+
+
+def test_shutdown_tolerates_nonzero_return(ocd):
+    ocd.disconnect = mock.Mock()
+    cmd_result = OcdCommandResult(4, "exit", "...", "dummy output")
+    ocd.cmd.recv.side_effect = [OcdCommandFailedError(cmd_result)]
+    ocd.shutdown()
+    ocd.cmd.assert_called_once_with("shutdown")
+    ocd.disconnect.assert_called_once()
+
+
+def test_shutdown_tolerates_empty_response(ocd):
+    ocd.disconnect = mock.Mock()
+    cmd_error = OcdEmptyResponseError(
+        "OpenOCD sent an unexpected empty response",
+        "...",
+        "")
+    ocd.cmd.recv.side_effect = [cmd_error]
+    ocd.shutdown()
+    ocd.cmd.assert_called_once_with("shutdown")
     ocd.disconnect.assert_called_once()

@@ -701,13 +701,12 @@ class PyOpenocdClient:
         #   The "shutdown" command immediately ends the TCL processing and
         #   an empty response is sent back to the TCL client.
 
+        # Tolerate both the above scenarios:
         try:
             self.cmd("shutdown")
         except OcdCommandFailedError:
-            # This is OK and expected for OpenOCD 0.12.0 and older
             pass
         except OcdEmptyResponseError:
-            # This is OK and expected for OpenOCD 0.13.0-dev and newer
             pass
         finally:
             self.disconnect()
