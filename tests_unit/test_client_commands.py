@@ -493,7 +493,7 @@ def test_shutdown_tolerates_empty_response(ocd):
 
 def test_shutdown_exit_code_support_detection(ocd):
     ocd.cmd.return_value = _prepare_command_result(
-        "shutdown ['error'|exit_status]\n  blah blah"
+        "shutdown ['error'|exit_code]\n  blah blah"
     )
     assert ocd._shutdown_supports_any_exit_code()
     ocd.cmd.assert_called_once_with("help shutdown")
