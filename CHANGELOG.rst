@@ -2,6 +2,11 @@
 Changelog for PyOpenocdClient
 =============================
 
+Unreleased
+----------
+
+* Drop support for Python 3.9 and older
+
 Release 0.1.2 (Apr 04, 2026)
 ----------------------------
 
