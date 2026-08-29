@@ -1,10 +1,19 @@
 # SPDX-License-Identifier: MIT
 
-import sys
 import argparse
+import sys
 
 from .client import PyOpenocdClient
-from .errors import OcdConnectionError, OcdInvalidResponseError, OcdCommandTimeoutError
+from .errors import OcdCommandTimeoutError, OcdConnectionError, OcdInvalidResponseError
+
+
+_DEFAULT_HOST = "127.0.0.1"
+_DEFAULT_PORT = 6666
+_DEFAULT_TIMEOUT = 10.0
+
+_EXIT_CODE_CONNECTION_ERROR = 91
+_EXIT_CODE_INVALID_RESPONSE = 92
+_EXIT_CODE_COMMAND_TIMEOUT = 93
 
 
 def eprint(s: str) -> None:
@@ -12,31 +21,46 @@ def eprint(s: str) -> None:
 
 
 def parse_args():
-    desc = "Command-line utility that sends a single Tcl command to OpenOCD through its Tcl-RPC interface."
+    desc = (
+        "Command-line utility that sends a single Tcl command to OpenOCD\n"
+        "through its Tcl-RPC interface."
+    )
     epilog = (
-        "If the Tcl command completes successfully, this tool exits with code 0. "
-        "Connection errors or command execution errors cause it to exit with a non-zero code. "
-        "The output of the Tcl command is written to stdout. "
+        "If the Tcl command completes successfully, this tool exits with code 0.\n"
+        "Connection errors or command execution errors cause it to exit with\n"
+        "a non-zero code.\n\n"
+        "The output of the Tcl command is written to stdout.\n"
         "Any error messages are written to stderr."
     )
-    parser = argparse.ArgumentParser(description=desc, epilog=epilog)
+    parser = argparse.ArgumentParser(
+        description=desc,
+        epilog=epilog,
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.color = False
 
     parser.add_argument(
         "--host",
-        default="127.0.0.1",
-        help="Hostname or address of the machine where OpenOCD runs (default: 127.0.0.1)",
+        default=_DEFAULT_HOST,
+        help=(
+            "Hostname or address of the machine where OpenOCD is running "
+            f"(default: {_DEFAULT_HOST})"
+        ),
     )
     parser.add_argument(
         "--port",
         type=int,
-        default=6666,
-        help="OpenOCD's Tcl-RPC server port number (default: 6666)",
+        default=_DEFAULT_PORT,
+        help=f"OpenOCD's Tcl-RPC server port number (default: {_DEFAULT_PORT})",
     )
     parser.add_argument(
         "--timeout",
         type=float,
-        default=10.0,
-        help="Timeout for the command execution in seconds (default: 10.0)",
+        default=_DEFAULT_TIMEOUT,
+        help=(
+            "Timeout for the command execution in seconds "
+            f"(default: {_DEFAULT_TIMEOUT:.1f})"
+        ),
     )
     parser.add_argument(
         "command",
@@ -61,15 +85,15 @@ def main() -> int:
 
     except OcdConnectionError as e:
         eprint(str(e))
-        return 91
+        return _EXIT_CODE_CONNECTION_ERROR
 
     except OcdInvalidResponseError as e:
         eprint("OpenOCD responded unexpectedly: " + str(e))
-        return 92
+        return _EXIT_CODE_INVALID_RESPONSE
 
     except OcdCommandTimeoutError as e:
         eprint(f"Timeout: The command did not complete within {e.timeout} seconds.")
-        return 93
+        return _EXIT_CODE_COMMAND_TIMEOUT
 
 
 if __name__ == "__main__":
