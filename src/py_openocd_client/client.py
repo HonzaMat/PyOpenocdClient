@@ -7,7 +7,12 @@ from typing import Any, List, Optional, Tuple, Type
 
 from .baseclient import _PyOpenocdBaseClient
 from .bp_parser import _BpParser
-from .errors import OcdCommandFailedError, OcdInvalidResponseError, _OcdParsingError
+from .errors import (
+    OcdCommandFailedError,
+    OcdEmptyResponseError,
+    OcdInvalidResponseError,
+    _OcdParsingError,
+)
 from .types import BpInfo, OcdCommandResult, WpInfo, WpType
 from .wp_parser import _WpParser
 
@@ -226,6 +231,14 @@ class PyOpenocdClient:
                 and s.endswith(">")
                 and re.match(r"^<-?\d+,", s) is not None
             )
+
+        if len(raw_result) == 0:
+            msg = (
+                "Received empty response from OpenOCD. "
+                "(This is OK for 'shutdown' or 'exit' commands but unexpected "
+                "for any other command.) "
+            )
+            raise OcdEmptyResponseError(msg, raw_cmd, raw_result)
 
         if not is_expected_raw_result(raw_result):
             msg = (
@@ -675,7 +688,7 @@ class PyOpenocdClient:
     def shutdown(self) -> None:
         """
         Shut down the OpenOCD process by sending the ``shutdown`` command to it.
-        PyOpenocd client also gets immediately disconnected from OpenOCD.
+        PyOpenocdClient also gets immediately disconnected from OpenOCD.
         """
         # Different OpenOCD versions respond to "shutdown" command differently:
         #
@@ -684,16 +697,19 @@ class PyOpenocdClient:
         #   which can be obtained normally as for any other TCL command -
         #   e.g. via the "catch" command.
         #
-        # - OpenOCD 0.13.0-dev and newer (from to commit "93f16eed4"):
+        # - OpenOCD 0.13.0-dev and newer (starting from commit "93f16eed4"):
         #   The "shutdown" command immediately ends the TCL processing and
         #   an empty response is sent back to the TCL client.
 
-        # For the above reasons, send the shutdown command via raw_cmd() and:
-        # - don't wrap "shutdown" into any other TCL commands,
-        # - don't expect any particular response.
-        self.raw_cmd("shutdown")
-
-        self.disconnect()
+        # Tolerate both the above scenarios:
+        try:
+            self.cmd("shutdown")
+        except OcdCommandFailedError:
+            pass
+        except OcdEmptyResponseError:
+            pass
+        finally:
+            self.disconnect()
 
     def raw_cmd(self, raw_cmd: str, timeout: Optional[float] = None) -> str:
         """

@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: MIT
 
+import warnings
+
 from .types import OcdCommandResult
 
 
@@ -87,9 +89,9 @@ class OcdInvalidResponseError(OcdBaseException):
     That is, PyOpenocdClient could not parse and/or interpret that command output.
     """
 
-    def __init__(self, msg: str, raw_cmd: str, out: str):
+    def __init__(self, msg: str, raw_cmd: str, raw_out: str):
         self._raw_cmd = raw_cmd
-        self._out = out
+        self._raw_out = raw_out
         super().__init__(msg)
 
     @property
@@ -100,11 +102,43 @@ class OcdInvalidResponseError(OcdBaseException):
         return self._raw_cmd
 
     @property
+    def raw_out(self) -> str:
+        """
+        The actual raw command's output that was unexpected
+        (that could not be understood or parsed).
+
+        .. versionadded:: 0.2.0
+        """
+        return self._raw_out
+
+    @property
     def out(self) -> str:
         """
-        The actual invalid response of the command.
+        Deprecated alias for ``raw_out``, kept just for compatibility.
+
+        .. deprecated:: 0.2.0
         """
-        return self._out
+        warnings.warn(
+            "OcdInvalidResponseError.out is deprecated. "
+            "Please use OcdInvalidResponseError.raw_out instead.",
+            DeprecationWarning,
+        )
+        return self._raw_out
+
+
+class OcdEmptyResponseError(OcdInvalidResponseError):
+    """
+    Exception which denotes that a TCL command produced an empty response.
+    It is a sub-class of :py:class:`py_openocd_client.OcdInvalidResponseError`.
+
+    Empty responses occur for commands ``exit`` and ``shutdown``, that is, commands
+    that immediately terminate the TCL session. For other commands, empty responses are
+    unexpected and would mean that OpenOCD mis-behaves.
+
+    .. versionadded:: 0.2.0
+    """
+
+    pass
 
 
 class OcdConnectionError(OcdBaseException):

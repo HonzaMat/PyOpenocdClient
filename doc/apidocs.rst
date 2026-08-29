@@ -38,6 +38,8 @@ Exceptions
 .. autoexception:: OcdInvalidResponseError
    :members:
 
+.. autoexception:: OcdEmptyResponseError
+
 .. autoexception:: OcdBaseException
 
 |

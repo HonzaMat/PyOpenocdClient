@@ -20,16 +20,15 @@ def pytest_addoption(parser):
 
 
 def _is_tcp_port_open(port):
-    """Check if the given TCP port is open on the localhost"""
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.settimeout(0.1)
-    try:
-        s.connect(("127.0.0.1", port))
-    except socket.error:
-        return False
-    else:
-        s.close()
-        return True
+    """Check if the given TCP port is open on the localhost by trying to connect."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.1)
+        try:
+            s.connect(("127.0.0.1", port))
+        except socket.error:
+            return False
+        else:
+            return True
 
 
 def _wait_until(predicate, timeout):

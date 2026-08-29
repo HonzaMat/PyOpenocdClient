@@ -73,7 +73,16 @@ def code_quality(session):
 def tests_unit(session):
     session.install(".")
     session.install("pytest")
-    session.run("python3", "-m", "pytest", "tests_unit/", "-vv", *session.posargs)
+    session.run(
+        "python3",
+        "-m",
+        "pytest",
+        "tests_unit/",
+        "-vv",
+        "-W",
+        "error",
+        *session.posargs,
+    )
 
 
 @nox.session
@@ -108,7 +117,14 @@ def tests_integration(session):
     # Additional arguments --openocd-path and --openocd-version are required,
     # see tests_integration/conftest.py.
     session.run(
-        "python3", "-m", "pytest", "tests_integration/", "-vv", *session.posargs
+        "python3",
+        "-m",
+        "pytest",
+        "tests_integration/",
+        "-vv",
+        "-W",
+        "error",
+        *session.posargs,
     )
 
 

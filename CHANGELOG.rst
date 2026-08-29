@@ -6,8 +6,12 @@ Unreleased
 ----------
 
 * Drop support for Python 3.9 and older (`#46`_)
+* Create new exception `OcdEmptyResponseError`. (`#49`_)
+* Improve `shutdown()` method to better check the "shutdown" command result. (`#49`_)
+* Deprecate property `OcdInvalidResponseError.out`. (`#49`_)
 
 .. _#46: https://github.com/HonzaMat/PyOpenocdClient/pull/46
+.. _#49: https://github.com/HonzaMat/PyOpenocdClient/pull/49
 
 Release 0.1.2 (Apr 04, 2026)
 ----------------------------
