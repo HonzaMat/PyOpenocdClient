@@ -9,17 +9,19 @@ jobs:
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v6
-      - name: Install python interpreters
-        run: |
-          sudo apt-get update
-          sudo add-apt-repository -y ppa:deadsnakes/ppa
-          sudo apt-get update
-          sudo apt-get install -y \
-            python3.13            \
-            python3.15
+      # - name: Install python interpreters
+      #   run: |
+      #     sudo apt-get update
+      #     sudo add-apt-repository -y ppa:deadsnakes/ppa
+      #     sudo apt-get update
+      #     sudo apt-get install -y \
+      #       python3.13            \
+      #       python3.15
       - name: Install nox
+        # nox[pbs] is needed to automatically download needed versions of
+        # python interpreters.
         run: |
-          python3 -m pip install --user nox
+          python3 -m pip install --user nox nox[pbs]
       - name: Run unit tests
         run: |
           nox -s tests_unit
