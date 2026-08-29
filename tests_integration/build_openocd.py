@@ -178,7 +178,7 @@ def main() -> int:
     print()
     print(f"Will check-out and build this OpenOCD version: {openocd_version.name}")
 
-
+    print_tool_versions()
     prepare_libjim(openocd_version)
     checkout_and_build_openocd(openocd_version)
     check_build(openocd_version)
