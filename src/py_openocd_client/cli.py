@@ -28,8 +28,8 @@ def parse_args() -> argparse.Namespace:
         "If the Tcl command completes successfully, this tool exits with code 0.\n"
         "Connection errors or command execution errors cause it to exit with\n"
         "a non-zero code.\n\n"
-        "The output of the Tcl command is written to stdout.\n"
-        "Any error messages are written to stderr."
+        "All the output of the Tcl command is written to stdout.\n"
+        "Any error messages coming from this tool are written to stderr."
     )
     parser = argparse.ArgumentParser(
         description=desc,
