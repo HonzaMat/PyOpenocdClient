@@ -1,5 +1,5 @@
-Console utility `openocd_cmd`
-=============================
+Console utility ``openocd_cmd``
+===============================
 
 The PyOpenocdClient package includes a console utility called ``openocd_cmd``.
 
@@ -39,8 +39,8 @@ Examples of use
    pc (/32): 0x08001234
 
 
-Exit code of ``openocd_cmd``
-----------------------------
+Exit code of openocd_cmd
+------------------------
 
 If the Tcl command is executed successfully, the ``openocd_cmd`` utility exits with code 0.
 
@@ -51,15 +51,19 @@ table below.
 | Situation                               | Exit code of ``openocd_cmd``                              |
 +=========================================+===========================================================+
 | Tcl command was executed and succeeded. | 0                                                         |
++-----------------------------------------+-----------------------------------------------------------+
 | Tcl command was executed and failed.    | Non-zero exit code, equal to the Tcl command return code. |
++-----------------------------------------+-----------------------------------------------------------+
 | Connection failure                      | 91                                                        |
++-----------------------------------------+-----------------------------------------------------------+
 | Invalid response from OpenOCD           | 92                                                        |
++-----------------------------------------+-----------------------------------------------------------+
 | Command timeout                         | 93                                                        |
 +-----------------------------------------+-----------------------------------------------------------+
 
 
-Output of ``openocd_cmd``
--------------------------
+Output of openocd_cmd
+---------------------
 
 All textual output of the Tcl command is written to stdout.
 
