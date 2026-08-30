@@ -95,5 +95,5 @@ def main() -> int:
         return _EXIT_CODE_COMMAND_TIMEOUT
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     sys.exit(main())
