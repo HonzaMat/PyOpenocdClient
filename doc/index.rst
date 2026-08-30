@@ -3,17 +3,22 @@ PyOpenocdClient documentation
 =============================
 
 **PyOpenocdClient** is a Python library for controlling `OpenOCD`_ software tool.
-It allows to send commands from Python programs to OpenOCD (commands like halt execution
-of the debugged target, read data from memory, read values of processor registers, ...)
-and receive results of these commands.
 
-OpenOCD is controlled by commands written in TCL language, and the set of available
-commands can be found in `OpenOCD documentation`_.
+This library allows Python programs to send commands to OpenOCD through its
+Tcl-RPC interface.
+
+The PyOpenocdClient package also provides a command-line utility that can be used
+to send commands to OpenOCD from non-Python programs, such as from shell scripts.
+
+Using Tcl commands, you can perform various actions with OpenOCD, such as halting
+the execution of the debugged target, reading data from memory,
+reading processor register values, and more. A complete list of Tcl commands
+supported by OpenOCD can be found in the `OpenOCD documentation`_.
 
 .. _OpenOCD: https://openocd.org
 .. _OpenOCD documentation: https://openocd.org/pages/documentation.html
 
-Homepage of PyOpenocdClient: https://github.com/HonzaMat/PyOpenocdClient
+🏠 Homepage of PyOpenocdClient: https://github.com/HonzaMat/PyOpenocdClient
 
 
 .. toctree::
