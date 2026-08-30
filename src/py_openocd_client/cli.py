@@ -6,7 +6,6 @@ import sys
 from .client import PyOpenocdClient
 from .errors import OcdCommandTimeoutError, OcdConnectionError, OcdInvalidResponseError
 
-
 _DEFAULT_HOST = "127.0.0.1"
 _DEFAULT_PORT = 6666
 _DEFAULT_TIMEOUT = 10.0
@@ -20,7 +19,7 @@ def eprint(s: str) -> None:
     print("error: " + s, file=sys.stderr)
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     desc = (
         "Command-line utility that sends a single Tcl command to OpenOCD\n"
         "through its Tcl-RPC interface."
@@ -35,7 +34,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description=desc,
         epilog=epilog,
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.color = False
 
@@ -92,7 +91,7 @@ def main() -> int:
         return _EXIT_CODE_INVALID_RESPONSE
 
     except OcdCommandTimeoutError as e:
-        eprint(f"Timeout: The command did not complete within {e.timeout} seconds.")
+        eprint(f"Timeout: The command did not complete within {e.timeout:.1f} seconds.")
         return _EXIT_CODE_COMMAND_TIMEOUT
 
 
