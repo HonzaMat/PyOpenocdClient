@@ -65,7 +65,7 @@ def test_command_success(monkeypatch, capsys):
         OcdCommandResult(0, "some_command arg", "...", "Command output\nAnother line"),
         expected_host="127.0.0.1",
         expected_port=6666,
-        expected_timeout=10.0,
+        expected_timeout=5.0,
         expected_command="some_command arg",
         expected_exit_code=0,
         expected_stdout="Command output\nAnother line\n",
@@ -106,7 +106,7 @@ def test_command_failure(monkeypatch, capsys):
         OcdCommandResult(4, "command_which_fails", "...", "Command failed blah blah"),
         expected_host="127.0.0.1",
         expected_port=6666,
-        expected_timeout=10.0,
+        expected_timeout=5.0,
         expected_command="command_which_fails",
         expected_exit_code=4,
         expected_stdout="Command failed blah blah\n",
@@ -122,7 +122,7 @@ def test_command_invalid_response(monkeypatch, capsys):
         OcdInvalidResponseError("Received bogus data.", "...", "raw_out"),
         expected_host="127.0.0.1",
         expected_port=6666,
-        expected_timeout=10.0,
+        expected_timeout=5.0,
         expected_command="some_command",
         expected_exit_code=_EXIT_CODE_INVALID_RESPONSE,
         expected_stdout="",
@@ -135,15 +135,15 @@ def test_command_timeout(monkeypatch, capsys):
         monkeypatch,
         capsys,
         ["openocd_cmd", "long_cmd"],
-        OcdCommandTimeoutError("Command timed out", "long_cmd", 10.0),
+        OcdCommandTimeoutError("Command timed out", "long_cmd", 5.0),
         expected_host="127.0.0.1",
         expected_port=6666,
-        expected_timeout=10.0,
+        expected_timeout=5.0,
         expected_command="long_cmd",
         expected_exit_code=_EXIT_CODE_COMMAND_TIMEOUT,
         expected_stdout="",
         expected_stderr=(
-            "error: Timeout: The command did not complete within 10.0 seconds.\n"
+            "error: Timeout: The command did not complete within 5.0 seconds.\n"
         ),
     )
 
