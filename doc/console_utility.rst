@@ -10,7 +10,7 @@ shell scripts or other non-Python programs.
 Synopsis
 --------
 
-.. code-block:: txt
+.. code-block:: text
 
    usage: openocd_cmd [-h] [--host HOST] [--port PORT] [--timeout TIMEOUT] command
 
