@@ -79,7 +79,7 @@ def main() -> int:
             print(result.out)
 
             if result.retcode != 0:
-                eprint(f"The command has failed (return code {result.retcode}).")
+                eprint(f"The command has failed (return code: {result.retcode}).")
             return result.retcode
 
     except OcdConnectionError as e:
