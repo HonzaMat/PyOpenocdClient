@@ -28,4 +28,5 @@ supported by OpenOCD can be found in the `OpenOCD documentation`_.
    installing
    quickstart
    apidocs
+   console_utility
    Changelog<changelog>

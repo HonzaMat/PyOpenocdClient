@@ -8,7 +8,7 @@ from .errors import OcdCommandTimeoutError, OcdConnectionError, OcdInvalidRespon
 
 _DEFAULT_HOST = "127.0.0.1"
 _DEFAULT_PORT = 6666
-_DEFAULT_TIMEOUT = 10.0
+_DEFAULT_TIMEOUT = 5.0
 
 _EXIT_CODE_CONNECTION_ERROR = 91
 _EXIT_CODE_INVALID_RESPONSE = 92

@@ -8,7 +8,7 @@ By default, OpenOCD listens for Tcl-RPC connections on TCP port 6666
 on the local machine (127.0.0.1). This is sufficient for common use cases,
 so no further configuration is usually necessary.
 
-If you need to change the Tcl-RPC server port, use the `tcl port`_ command.
+If you need to change the Tcl-RPC server port, use the OpenOCD' `tcl port`_ command.
 
 To make the Tcl-RPC server accessible from remote machines, not just from
 the local machine, use OpenOCD's bindto_ command (for example, `bindto 0.0.0.0`).
@@ -64,7 +64,7 @@ Both these approaches are shown below.
 
     with PyOpenocdClient(host="some_hostname", port=1234) as ocd:
 
-        # Now interact with OpenOCD. For example:
+        # Now you can interact with OpenOCD:
         ocd.reset_halt()
         ocd.cmd("load_image path/to/program.elf")
         ocd.resume()
@@ -112,7 +112,7 @@ Convenience methods for common OpenOCD commands
 
 For easier use, PyOpenocdClient provides convenience methods (shortcuts) for frequently
 used OpenOCD commands. These methods execute the corresponding command, parse its output
-and provide it in the form of native Python data types.
+and return it in the form of native Python data types.
 
 This eliminates the need to call
 :py:meth:`cmd()<py_openocd_client.PyOpenocdClient.cmd>` and parse the

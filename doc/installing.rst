@@ -6,8 +6,8 @@ Installation
 Installing PyOpenocdClient via Pip
 ----------------------------------
 
-To install PyOpenocdClient, use Pip as usual to download and install
-the package from the PyPI repository:
+The PyOpenocdClient package can be downloaded and installed via Pip
+from the official PyPI package index:
 
 .. code-block:: bash
 
@@ -19,7 +19,7 @@ Installing PyOpenocdClient from source
 --------------------------------------
 
 .. note::
-    This approach is only recommended for advanced users.
+    This installation method is recommended for advanced users only.
 
 Alternatively, PyOpenocdClient can be installed directly from the source code.
 This may be useful for experiments or when making own contributions to PyOpenocdClient.
@@ -30,7 +30,7 @@ This may be useful for experiments or when making own contributions to PyOpenocd
     $ cd PyOpenocdClient
 
     # Optionally, check out a specific revision
-    $ git checkout 0.1.0
+    # git checkout 0.1.0
 
     $ python3 -m pip install .
 
