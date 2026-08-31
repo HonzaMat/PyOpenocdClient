@@ -17,3 +17,6 @@ classifiers = [
 Homepage = "https://github.com/HonzaMat/PyOpenocdClient"
 Issues = "https://github.com/HonzaMat/PyOpenocdClient/issues"
 Documentation = "https://pyopenocdclient.readthedocs.io/en/latest/"
+
+[project.scripts]
+openocd_cmd = "py_openocd_client.cli:main"

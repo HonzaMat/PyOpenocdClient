@@ -1,8 +1,8 @@
 
 .. _api_doc:
 
-API Documentation
-=================
+Python API Documentation
+========================
 
 |
 
