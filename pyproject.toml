@@ -1,3 +1,8 @@
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "PyOpenocdClient"
 version = "0.2.0-dev"
@@ -20,3 +25,6 @@ Documentation = "https://pyopenocdclient.readthedocs.io/en/latest/"
 
 [project.scripts]
 openocd_cmd = "py_openocd_client.cli:main"
+
+[tool.setuptools.package-data]
+py_openocd_client = ["py.typed"]
