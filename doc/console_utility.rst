@@ -1,5 +1,7 @@
-Console utility ``openocd_cmd``
-===============================
+Console utility "openocd_cmd"
+=============================
+
+.. versionadded:: 0.2.0
 
 The PyOpenocdClient package includes a console utility called ``openocd_cmd``.
 
