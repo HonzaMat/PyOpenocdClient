@@ -2,8 +2,8 @@
 Changelog for PyOpenocdClient
 =============================
 
-Unreleased
-----------
+Release 0.2.0 (Sep 28, 2026)
+----------------------------
 
 * Drop support for Python 3.9 and older (`#46`_)
 * Create new exception ``OcdEmptyResponseError``. (`#49`_)
