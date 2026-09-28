@@ -1,5 +1,5 @@
-Console utility ``openocd_cmd``
-===============================
+Console utility "openocd_cmd"
+=============================
 
 .. versionadded:: 0.2.0
 
