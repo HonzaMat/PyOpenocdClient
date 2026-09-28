@@ -1,3 +1,8 @@
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "PyOpenocdClient"
 version = "0.2.0-dev"
@@ -9,9 +14,9 @@ readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+license = "MIT"
 
 [project.urls]
 Homepage = "https://github.com/HonzaMat/PyOpenocdClient"
@@ -20,3 +25,6 @@ Documentation = "https://pyopenocdclient.readthedocs.io/en/latest/"
 
 [project.scripts]
 openocd_cmd = "py_openocd_client.cli:main"
+
+[tool.setuptools.package-data]
+py_openocd_client = ["py.typed"]

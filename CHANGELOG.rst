@@ -12,11 +12,13 @@ Unreleased
 * Add new argument ``exit_code`` to the ``shutdown()`` method. (`#51`_)
 * Add ``openocd_cmd`` command-line utility that can be used from non-Python
   programs (shell scripts or similar). (`#53`_)
+* Advertise typing information (py.typed) per PEP 561 (`#55`_)
 
 .. _#46: https://github.com/HonzaMat/PyOpenocdClient/pull/46
 .. _#49: https://github.com/HonzaMat/PyOpenocdClient/pull/49
 .. _#51: https://github.com/HonzaMat/PyOpenocdClient/pull/51
 .. _#53: https://github.com/HonzaMat/PyOpenocdClient/pull/53
+.. _#55: https://github.com/HonzaMat/PyOpenocdClient/pull/55
 
 Release 0.1.2 (Apr 04, 2026)
 ----------------------------
