@@ -1,6 +1,8 @@
 Console utility ``openocd_cmd``
 ===============================
 
+.. versionadded:: 0.2.0
+
 The PyOpenocdClient package includes a console utility called ``openocd_cmd``.
 
 This console program can be used to send Tcl commands to OpenOCD from command-line,
