@@ -9,7 +9,6 @@ jobs:
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v6
-
       - name: Install the reuse linter tool
         run: |
           python3 -m pip install --user reuse==6.2.0
