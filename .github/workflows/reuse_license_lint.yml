@@ -1,21 +1,17 @@
 # SPDX-FileCopyrightText: 2026 Jan Matyas <info@janmatyas.net>
 # SPDX-License-Identifier: MIT
 
-name: Code quality checks
-on:
-  push:
-  schedule:
-    - cron: '42 20 * * 2,4,6'
+name: Check compliance with REUSE spec
+on: push
 jobs:
-  code_quality:
+  reuse_compliance_check:
     runs-on: ubuntu-26.04
     steps:
       - name: Check out the repository code
         uses: actions/checkout@v6
-
+      - name: Install the reuse linter tool
+        run: |
+          python3 -m pip install --user reuse==6.2.0
       - name: Perform the check
         run: |
-          python3 -m pip install --user nox
-          nox -s code_quality
-
-
+          reuse lint

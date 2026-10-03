@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Jan Matyas <info@janmatyas.net>
+# SPDX-License-Identifier: MIT
+
 enum-tools==0.13.0
 Sphinx==8.2.3
 sphinx-autodoc-typehints==3.5.2

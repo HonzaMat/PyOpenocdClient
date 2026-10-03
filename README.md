@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2026 Jan Matyas <info@janmatyas.net>
+SPDX-License-Identifier: MIT
+-->
+
 # PyOpenocdClient
 
 [![Build documentation](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/build_doc.yml/badge.svg?event=schedule)](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/build_doc.yml)

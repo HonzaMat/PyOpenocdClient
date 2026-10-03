@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2026 Jan Matyas <info@janmatyas.net>
+# SPDX-License-Identifier: MIT
+
 """
 Helper script to make a release
 

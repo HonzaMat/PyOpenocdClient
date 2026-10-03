@@ -1,6 +1,8 @@
+# SPDX-FileCopyrightText: 2026 Jan Matyas <info@janmatyas.net>
+# SPDX-License-Identifier: MIT
 
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -17,6 +19,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 license = "MIT"
+license-files = [
+    "LICENSE",
+    "LICENSES/*",
+]
 
 [project.urls]
 Homepage = "https://github.com/HonzaMat/PyOpenocdClient"

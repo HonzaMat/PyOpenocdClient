@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+# SPDX-FileCopyrightText: 2026 Jan Matyas <info@janmatyas.net>
 # SPDX-License-Identifier: MIT
 
 from dataclasses import dataclass, field

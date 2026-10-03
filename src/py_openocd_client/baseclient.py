@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 Jan Matyas <info@janmatyas.net>
 # SPDX-License-Identifier: MIT
 
 import select
@@ -10,7 +11,7 @@ from .errors import OcdCommandTimeoutError, OcdConnectionError
 
 class _PyOpenocdBaseClient:
     """
-    Internal class that implements the TCL command exchange with OpenOCD.
+    Internal class that implements the Tcl command exchange with OpenOCD.
 
     .. warning::
         This class is not intended for direct use.
