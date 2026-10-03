@@ -10,8 +10,6 @@ software tool.
 
 It allows to send Tcl commands from Python programs to OpenOCD &mdash; for instance commands like halt execution of the program, view data in memory, place breakpoints, single-step, ...
 
-In addition, a console utility is included with PyOpenocdClient that can be used to send Tcl commands to OpenOCD from non-Python software, such as shell scripts.
-
 Main features of PyOpenocdClient:
 
 * you can send any Tcl command to OpenOCD and obtain its result;
@@ -28,6 +26,8 @@ Main features of PyOpenocdClient:
 
 * the library is fully open-source under a permissive license (MIT license).
 
+In addition to the main Python library, a console utility is included, which allows
+to send Tcl commands to OpenOCD from non-Python software, such as shell scripts.
 
 ## Quick instructions
 
