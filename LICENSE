@@ -1,6 +1,6 @@
-PyOpenocdClient is distributed under the terms of the MIT license.
+PyOpenocdClient is distributed under the terms of the MIT License.
 See LICENSES/MIT.txt.
 
-PyOpenocdClient follows the REUSE Specification 3.3, which standardizes how copyright
-and license information is declared in software projects. Please see
-https://reuse.software/spec-3.3/.
+PyOpenocdClient conforms to the REUSE Specification, version 3.3,
+which standardizes how copyright and licensing information is declared
+in software projects. See https://reuse.software/spec-3.3/.
