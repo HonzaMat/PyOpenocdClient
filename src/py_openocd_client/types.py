@@ -27,7 +27,8 @@ class OcdCommandResult:
 
     cmd: str
     """
-    The original Tcl command -- as provided by the caller to :meth:`PyOpenocdClient.cmd`.
+    The original Tcl command -- as provided by the caller
+    to :meth:`PyOpenocdClient.cmd`.
     """
 
     raw_cmd: str
