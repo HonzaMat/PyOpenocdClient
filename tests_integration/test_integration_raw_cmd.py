@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 Jan Matyas <info@janmatyas.net>
 # SPDX-License-Identifier: MIT
 
 import time
@@ -15,7 +16,7 @@ def test_no_output(openocd_process):
     with PyOpenocdClient() as ocd:
         out = ocd.raw_cmd("puts some_text")
 
-        # The text is printed to stdout but the actual TCL command
+        # The text is printed to stdout but the actual Tcl command
         # does not produce any output.
         assert out == ""
 

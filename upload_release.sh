@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2026 Jan Matyas <info@janmatyas.net>
+# SPDX-License-Identifier: MIT
+
 # Helper script to upload a release (content of dist/) to PyPI
 
 set -e
