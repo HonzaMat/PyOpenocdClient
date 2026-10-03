@@ -8,36 +8,41 @@ from typing import Optional
 @dataclass
 class OcdCommandResult:
     """
-    This class represets result of an executed and completed TCL command.
+    This class represents the result of an executed and completed Tcl command.
 
     An instance of this class is returned by :meth:`PyOpenocdClient.cmd`.
+
+    Here, "original Tcl command" refers to the command provided by the caller
+    to :meth:`PyOpenocdClient.cmd`, before PyOpenocdClient wraps or otherwise
+    modifies that command..
     """
 
     retcode: int
     """
-    Return code of the command.
+    Return code of the original Tcl command.
 
-    Zero value means a successfully completed command. Non-zero value means
-    a failed command (an error during command execution).
+    A value of zero means successfully completed command. A non-zero value indicates
+    that the command failed.
     """
 
     cmd: str
     """
-    The original command that the user requested to exeucte.
+    The original Tcl command -- as provided by the caller to :meth:`PyOpenocdClient.cmd`.
     """
 
     raw_cmd: str
     """
-    The actual "raw" command that was sent by PyOpenocdClient to OpenOCD for execution.
+    The "raw" Tcl script that was actually sent by PyOpenocdClient to OpenOCD
+    for execution.
 
-    This is typically the user-entered command (`cmd`) wrapped in other TCL commands
-    so that PyOpenocdClient is able to obtain both the output and the return code
-    of the user-entered command.
+    This is typically the original Tcl command wrapped in additional Tcl code,
+    so that PyOpenocdClient is able to retrieve *both* the textual output and
+    the return code of the original Tcl command.
     """
 
     out: str
     """
-    Textual output of the command.
+    Textual output of the original Tcl command.
     """
 
 

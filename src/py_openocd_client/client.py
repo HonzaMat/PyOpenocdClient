@@ -21,11 +21,11 @@ class PyOpenocdClient:
     """
     PyOpenocdClient is the main class which forms the interface
     of the ``py_openocd_client`` package. One instance of this class
-    represents one TCL connection to a running OpenOCD process.
+    represents one Tcl connection to a running OpenOCD process.
 
     This class provides:
 
-    - :meth:`cmd` method to send any TCL command to OpenOCD and obtain
+    - :meth:`cmd` method to send any Tcl command to OpenOCD and obtain
       the command result,
     - convenience methods (shortcuts) to issue some of the most common OpenOCD commands
       -- :meth:`halt`, :meth:`resume`, :meth:`read_memory`, :meth:`get_reg`, ..., etc.
@@ -106,7 +106,7 @@ class PyOpenocdClient:
 
     def is_connected(self) -> bool:
         """
-        Determine if the instance is connected.
+        Return if the connection is currently established.
         """
         return self._client_base.is_connected()
 
@@ -135,12 +135,12 @@ class PyOpenocdClient:
         timeout: Optional[float] = None,
     ) -> OcdCommandResult:
         """
-        Send a TCL command to OpenOCD, wait for its completion and return the
+        Send a Tcl command to OpenOCD, wait for its completion and return the
         command result. The result of the command is represented by
         :py:class:`OcdCommandResult`.
 
-        ``cmd`` is the TCL command to execute, or possibly multiple TCL commands --
-        a short TCL script.
+        ``cmd`` is the Tcl command to execute, or possibly multiple Tcl commands --
+        a short Tcl script.
 
         ``capture`` determines whether to also obtain log entries produced
         by the command and return it as part of the command output. (Default: False)
@@ -205,7 +205,7 @@ class PyOpenocdClient:
 
         .. note::
            The :py:meth:`cmd` method wraps the user-provided command with additional
-           TCL commands (like ``catch`` and ``return``), and the resulting complex
+           Tcl commands (like ``catch`` and ``return``), and the resulting complex
            command is then sent to OpenOCD. This is needed so that both the return
            code and the textual output of the command can be obtained.
 
@@ -719,13 +719,13 @@ class PyOpenocdClient:
         # Different OpenOCD versions respond to "shutdown" command differently:
         #
         # - OpenOCD 0.12.0 and older:
-        #   The "shutdown" command results in a non-zero TCL return code,
-        #   which can be obtained normally as for any other TCL command -
+        #   The "shutdown" command results in a non-zero Tcl return code,
+        #   which can be obtained normally as for any other Tcl command -
         #   e.g. via the "catch" command.
         #
         # - OpenOCD 0.13.0-dev and newer (starting from commit "93f16eed4"):
-        #   The "shutdown" command immediately ends the TCL processing and
-        #   an empty response is sent back to the TCL client.
+        #   The "shutdown" command immediately ends the Tcl processing and
+        #   an empty response is sent back to the Tcl client.
 
         # Tolerate both the above scenarios:
         try:
@@ -739,32 +739,32 @@ class PyOpenocdClient:
 
     def raw_cmd(self, raw_cmd: str, timeout: Optional[float] = None) -> str:
         """
-        Low-level method that sends a TCL command to OpenOCD in its "raw" form --
+        Low-level method that sends a Tcl command to OpenOCD in its "raw" form --
         exactly as the user has entered it, without wrapping it into any additional
-        TCL commands.
+        Tcl commands.
 
         After the command completes, its textual output is returned as a simple string.
         Return code of the command is **not** obtained.
 
         .. warning::
            The :py:meth:`raw_cmd` method does not have the ability
-           to recognize whether the TCL command succeeded or failed. That's because
+           to recognize whether the Tcl command succeeded or failed. That's because
            the return code of the command cannot be obtained.
 
            For that reason, the method :py:meth:`cmd` should always be preferred
            over :py:meth:`raw_cmd`.
 
-        ``raw_cmd`` is the raw TCL command to execute (or possibly multiple TCL
-        commands -- a short TCL script).
+        ``raw_cmd`` is the raw Tcl command to execute (or possibly multiple Tcl
+        commands -- a short Tcl script).
 
         ``timeout`` can be used to override the timeout for this command. If not
         specified, the default timeout will apply -- see :py:meth:`set_default_timeout`.
 
         If the command timeout is exceeded while waiting for OpenOCD to provide
         the command result, :py:class:`OcdCommandTimeoutError` is raised and
-        the connection is re-established.
+        the connection gets re-established.
 
-        If connection error occurs during the command execution,
-        :py:class:`OcdConnectionError` is raised and the connection is terminated.
+        If any connection error occurs during the command execution,
+        :py:class:`OcdConnectionError` is raised and the connection gets terminated.
         """
         return self._client_base.raw_cmd(raw_cmd, timeout=timeout)

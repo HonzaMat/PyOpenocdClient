@@ -15,7 +15,7 @@ class OcdBaseException(Exception):
 
 class OcdCommandFailedError(OcdBaseException):
     """
-    Exception which denotes that a TCL command failed;
+    Exception which denotes that a Tcl command failed;
     that is, the command ended with a non-zero return code.
     """
 
@@ -49,7 +49,7 @@ class OcdCommandFailedError(OcdBaseException):
 
 class OcdCommandTimeoutError(OcdBaseException):
     """
-    Exception that is raised whenever a TCL command does not complete
+    Exception that is raised whenever a Tcl command does not complete
     within the configured timeout.
 
     If this exception occurs, it is advisable to:
@@ -58,8 +58,9 @@ class OcdCommandTimeoutError(OcdBaseException):
     - re-issue the command with a larger timeout.
 
     .. note::
-        If this exception occurs, then reconnection is automatically performed:
-        the current connection to OpenOCD is closed and a new one established.
+        If this exception occurs, then PyOpenocdClient automatically performs
+        reconnection in the background: The current connection to OpenOCD is closed
+        and a new one established.
 
     """
 
@@ -71,7 +72,7 @@ class OcdCommandTimeoutError(OcdBaseException):
     @property
     def raw_cmd(self) -> str:
         """
-        Raw command which did not complete within the timeout.
+        The raw Tcl command which did not complete within the timeout.
         """
         return self._raw_cmd
 
@@ -85,7 +86,7 @@ class OcdCommandTimeoutError(OcdBaseException):
 
 class OcdInvalidResponseError(OcdBaseException):
     """
-    Exception which means that a TCL command produced invalid (unexpected) output.
+    Exception which means that a Tcl command produced invalid (unexpected) output.
     That is, PyOpenocdClient could not parse and/or interpret that command output.
     """
 
@@ -97,14 +98,14 @@ class OcdInvalidResponseError(OcdBaseException):
     @property
     def raw_cmd(self) -> str:
         """
-        Raw command that produced the invalid response.
+        The raw Tcl command that produced the invalid response.
         """
         return self._raw_cmd
 
     @property
     def raw_out(self) -> str:
         """
-        The actual raw command's output that was unexpected
+        The actual output of the raw Tcl command that was unexpected
         (that could not be understood or parsed).
 
         .. versionadded:: 0.2.0
@@ -128,12 +129,13 @@ class OcdInvalidResponseError(OcdBaseException):
 
 class OcdEmptyResponseError(OcdInvalidResponseError):
     """
-    Exception which denotes that a TCL command produced an empty response.
+    Exception which denotes that a Tcl command produced an empty response.
     It is a sub-class of :py:class:`py_openocd_client.OcdInvalidResponseError`.
 
-    Empty responses occur for commands ``exit`` and ``shutdown``, that is, commands
-    that immediately terminate the TCL session. For other commands, empty responses are
-    unexpected and would mean that OpenOCD mis-behaves.
+    Empty responses are expected for Tcl commands ``exit`` and ``shutdown``,
+    that is, for Tcl commands that immediately terminate the Tcl-RPC session.
+    For other commands, empty responses are unexpected and mean that OpenOCD
+    mis-behaves.
 
     .. versionadded:: 0.2.0
     """
