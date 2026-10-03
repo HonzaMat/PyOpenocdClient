@@ -120,12 +120,13 @@ def pytest_sessionstart(session):
 @pytest.fixture
 def openocd_process(openocd_path):
 
-    # Start OpenOCD without any target, just so that TCL command interface
+    # Start OpenOCD without any target, just so that Tcl-RPC command interface
     # becomes available.
     cmd = [openocd_path, "-c", "noinit", "-c", f"tcl_port {TCL_PORT_NUM}"]
     proc = subprocess.Popen(cmd)
 
     try:
+        # Avoid races: We cannot start the test before OpenOCD gets ready.
         _wait_until_tcp_port_open(TCL_PORT_NUM)
         yield proc
 
