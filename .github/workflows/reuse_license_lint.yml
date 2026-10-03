@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 Jan Matyas <info@janmatyas.net>
+# SPDX-License-Identifier: MIT
+
+name: Check REUSE spec compliance
+on: push
+jobs:
+  build_doc:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Check out the repository code
+        uses: actions/checkout@v6
+
+      - name: Install the reuse linting tool
+        run: |
+          python3 -m pip install --user reuse==6.2.0
+      - name: Check the source for compliance with the REUSE spec
+        run: |
+          reuse lint
