@@ -4,7 +4,7 @@
 name: Check compliance with REUSE spec
 on: push
 jobs:
-  build_doc:
+  reuse_compliance_check:
     runs-on: ubuntu-26.04
     steps:
       - name: Check out the repository code
