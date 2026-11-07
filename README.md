@@ -10,6 +10,9 @@ SPDX-License-Identifier: MIT
 [![Unit tests](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/unit_tests.yml/badge.svg?event=schedule)](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/unit_tests.yml)
 [![Integration tests](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/integration_tests.yml/badge.svg?event=schedule)](https://github.com/HonzaMat/PyOpenocdClient/actions/workflows/integration_tests.yml)
 
+![Python 3.10 and newer](https://img.shields.io/badge/Python-3.10_and_newer-blue?logo=python&logoColor=yellow)
+[![MIT License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/HonzaMat/PyOpenocdClient/blob/main/LICENSE)
+
 **PyOpenocdClient** is a Python library for controlling [OpenOCD](https://openocd.org)
 software tool.
 
