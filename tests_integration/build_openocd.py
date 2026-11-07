@@ -71,10 +71,11 @@ def recreate_dir(d: Path) -> None:
 def run_cmd(
     cmd: list[str], cwd: Path | None = None, env: dict[str, str] | None = None
 ) -> None:
+    effective_cwd = cwd if cwd is not None else Path.cwd()
     print_flush()
-    print_flush(f"Running command: {repr(cmd)} (work dir: {cwd})")
+    print_flush(f"Running command: {cmd!r} (work dir: {effective_cwd!s})")
     print_flush()
-    subprocess.check_call(cmd, cwd=cwd, env=env)
+    subprocess.check_call(cmd, cwd=effective_cwd, env=env)
 
 
 def print_tool_versions() -> None:
@@ -145,16 +146,19 @@ def checkout_and_build_openocd(version: OpenOcdVersion) -> None:
     run_cmd(["git", "checkout", version.git_rev], cwd=src_dir)
     git_show_current_commit(cwd=src_dir)
 
-    if version.libjim == LIBJIM_INTERNAL:
-        # Need to checkout the jimtcl submodule
-        run_cmd(["git", "submodule", "update", "--init", "--recursive"], cwd=src_dir)
+    run_cmd(["/bin/sh", "./bootstrap", "nosubmodule"], cwd=src_dir)
 
-    run_cmd(["/bin/sh", "./bootstrap"], cwd=src_dir)
+    if version.libjim == LIBJIM_INTERNAL:
+        run_cmd(
+            ["git", "submodule", "update", "--init", "--recursive", "jimtcl"],
+            cwd=src_dir,
+        )
 
     configure_env = os.environ.copy()
     configure_env["CFLAGS"] = version.extra_cflags
 
-    configure_cmd = ["/bin/sh", "./configure", "--prefix=" + str(install_dir)]
+    configure_cmd = ["/bin/sh", "./configure", f"--prefix={install_dir!s}"]
+    configure_cmd += ["--disable-jlink"]  # Avoid the need for libjaylink subdmodule
     configure_cmd += version.extra_configure_args
 
     run_cmd(configure_cmd, cwd=src_dir, env=configure_env)
@@ -168,14 +172,14 @@ def check_build(version: OpenOcdVersion) -> None:
     openocd_bin = install_dir / "bin" / "openocd"
     if not openocd_bin.is_file():
         raise RuntimeError(
-            f"The expected binary does not exist after the build: {str(openocd_bin)}"
+            f"The expected binary does not exist after the build: {openocd_bin!s}"
         )
 
     run_cmd([str(openocd_bin), "--version"])
 
     print_flush()
     print_flush(f'OpenOCD "{version.name}" successfully built!')
-    print_flush(f"Path to the OpenOCD binary: {str(openocd_bin)}")
+    print_flush(f"Path to the OpenOCD binary: {openocd_bin!s}")
 
 
 def main() -> int:
